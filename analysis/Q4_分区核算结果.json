@@ -1,0 +1,109 @@
+{
+ "sa_table": [
+  {
+   "sa": "S001",
+   "boxes": 15,
+   "mass": 154.0,
+   "vol": 0.394,
+   "first": 2
+  },
+  {
+   "sa": "S002",
+   "boxes": 8,
+   "mass": 81.0,
+   "vol": 0.211,
+   "first": 2
+  },
+  {
+   "sa": "S003",
+   "boxes": 8,
+   "mass": 81.0,
+   "vol": 0.211,
+   "first": 2
+  },
+  {
+   "sa": "S004",
+   "boxes": 6,
+   "mass": 59.0,
+   "vol": 0.156,
+   "first": 2
+  },
+  {
+   "sa": "S005",
+   "boxes": 6,
+   "mass": 59.0,
+   "vol": 0.156,
+   "first": 2
+  },
+  {
+   "sa": "S006",
+   "boxes": 6,
+   "mass": 59.0,
+   "vol": 0.156,
+   "first": 2
+  },
+  {
+   "sa": "S007",
+   "boxes": 5,
+   "mass": 45.0,
+   "vol": 0.129,
+   "first": 2
+  },
+  {
+   "sa": "S008",
+   "boxes": 5,
+   "mass": 45.0,
+   "vol": 0.129,
+   "first": 2
+  },
+  {
+   "sa": "S009",
+   "boxes": 3,
+   "mass": 25.0,
+   "vol": 0.067,
+   "first": 2
+  },
+  {
+   "sa": "S010",
+   "boxes": 3,
+   "mass": 25.0,
+   "vol": 0.067,
+   "first": 2
+  },
+  {
+   "sa": "S011",
+   "boxes": 3,
+   "mass": 25.0,
+   "vol": 0.067,
+   "first": 2
+  },
+  {
+   "sa": "S012",
+   "boxes": 3,
+   "mass": 25.0,
+   "vol": 0.067,
+   "first": 2
+  },
+  {
+   "sa": "S013",
+   "boxes": 3,
+   "mass": 25.0,
+   "vol": 0.067,
+   "first": 2
+  },
+  {
+   "sa": "S014",
+   "boxes": 3,
+   "mass": 25.0,
+   "vol": 0.067,
+   "first": 2
+  },
+  {
+   "sa": "S015",
+   "boxes": 3,
+   "mass": 25.0,
+   "vol": 0.067,
+   "first": 2
+  }
+ ]
+}

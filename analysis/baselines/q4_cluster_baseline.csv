@@ -1,0 +1,11 @@
+﻿method,K,feasible,group_sizes,min_size_ok,D,G,J,cross_u,cross_extra,need
+K-means (geo),2,True,"[6, 9]",True,36,9,0.167,2,2,"{'uavA': 4, 'batA': 4, 'uavB': 4, 'batB': 6, 'uavC': 4, 'batC': 5, 'relay': 4, 'relay_comp': 5}"
+K-means (geo+demand),2,True,"[1, 14]",False,29,4,0.757,0,0,"{'uavA': 4, 'batA': 4, 'uavB': 2, 'batB': 4, 'uavC': 4, 'batC': 6, 'relay': 2, 'relay_comp': 3}"
+Ward (geo),2,True,"[5, 10]",True,37,9,0.2735,3,3,"{'uavA': 4, 'batA': 4, 'uavB': 4, 'batB': 5, 'uavC': 4, 'batC': 6, 'relay': 4, 'relay_comp': 6}"
+Ward (geo+demand),2,True,"[1, 14]",False,29,4,0.757,0,0,"{'uavA': 4, 'batA': 4, 'uavB': 2, 'batB': 4, 'uavC': 4, 'batC': 6, 'relay': 2, 'relay_comp': 3}"
+K-means (geo),3,True,"[4, 5, 6]",True,43,15,0.2285,3,3,"{'uavA': 4, 'batA': 4, 'uavB': 5, 'batB': 6, 'uavC': 6, 'batC': 7, 'relay': 5, 'relay_comp': 6}"
+K-means (geo+demand),3,True,"[1, 7, 7]",False,39,11,0.5382,3,3,"{'uavA': 4, 'batA': 4, 'uavB': 4, 'batB': 5, 'uavC': 5, 'batC': 7, 'relay': 4, 'relay_comp': 6}"
+Ward (geo),3,True,"[3, 5, 7]",True,40,12,0.463,3,3,"{'uavA': 4, 'batA': 4, 'uavB': 5, 'batB': 6, 'uavC': 4, 'batC': 6, 'relay': 5, 'relay_comp': 6}"
+Ward (geo+demand),3,True,"[1, 5, 9]",False,36,9,0.6738,2,2,"{'uavA': 4, 'batA': 4, 'uavB': 4, 'batB': 5, 'uavC': 4, 'batC': 6, 'relay': 4, 'relay_comp': 5}"
+SC-MAE-RG (proposed),2,True,"[4, 11]",True,31,5,0.6131,1,1,"{'uavA': 4, 'batA': 4, 'uavB': 4, 'batB': 6, 'uavC': 2, 'batC': 4, 'relay': 3, 'relay_comp': 4}"
+SC-MAE-RG (proposed),3,True,"[4, 4, 7]",True,38,10,0.4375,3,3,"{'uavA': 4, 'batA': 4, 'uavB': 5, 'batB': 6, 'uavC': 3, 'batC': 5, 'relay': 5, 'relay_comp': 6}"

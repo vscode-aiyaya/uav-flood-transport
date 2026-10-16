@@ -1,0 +1,496 @@
+{
+ "seed": 20251015,
+ "global_need": {
+  "uavA": 4,
+  "batA": 4,
+  "uavB": 2,
+  "batB": 4,
+  "uavC": 2,
+  "batC": 4,
+  "relay": 2,
+  "relay_comp": 3
+ },
+ "rows": [
+  {
+   "method": "K-means (geo)",
+   "K": 2,
+   "feasible": true,
+   "parts": [
+    [
+     "S001",
+     "S002",
+     "S004",
+     "S005",
+     "S009",
+     "S010",
+     "S012",
+     "S013",
+     "S014"
+    ],
+    [
+     "S003",
+     "S006",
+     "S007",
+     "S008",
+     "S011",
+     "S015"
+    ]
+   ],
+   "group_sizes": [
+    6,
+    9
+   ],
+   "min_size_ok": true,
+   "D": 36,
+   "G": 9,
+   "J": 0.167,
+   "cross_u": 2,
+   "cross_extra": 2,
+   "need": {
+    "uavA": 4,
+    "batA": 4,
+    "uavB": 4,
+    "batB": 6,
+    "uavC": 4,
+    "batC": 5,
+    "relay": 4,
+    "relay_comp": 5
+   }
+  },
+  {
+   "method": "K-means (geo+demand)",
+   "K": 2,
+   "feasible": true,
+   "parts": [
+    [
+     "S001"
+    ],
+    [
+     "S002",
+     "S003",
+     "S004",
+     "S005",
+     "S006",
+     "S007",
+     "S008",
+     "S009",
+     "S010",
+     "S011",
+     "S012",
+     "S013",
+     "S014",
+     "S015"
+    ]
+   ],
+   "group_sizes": [
+    1,
+    14
+   ],
+   "min_size_ok": false,
+   "D": 29,
+   "G": 4,
+   "J": 0.757,
+   "cross_u": 0,
+   "cross_extra": 0,
+   "need": {
+    "uavA": 4,
+    "batA": 4,
+    "uavB": 2,
+    "batB": 4,
+    "uavC": 4,
+    "batC": 6,
+    "relay": 2,
+    "relay_comp": 3
+   }
+  },
+  {
+   "method": "Ward (geo)",
+   "K": 2,
+   "feasible": true,
+   "parts": [
+    [
+     "S001",
+     "S003",
+     "S006",
+     "S007",
+     "S008",
+     "S010",
+     "S011",
+     "S013",
+     "S014",
+     "S015"
+    ],
+    [
+     "S002",
+     "S004",
+     "S005",
+     "S009",
+     "S012"
+    ]
+   ],
+   "group_sizes": [
+    5,
+    10
+   ],
+   "min_size_ok": true,
+   "D": 37,
+   "G": 9,
+   "J": 0.2735,
+   "cross_u": 3,
+   "cross_extra": 3,
+   "need": {
+    "uavA": 4,
+    "batA": 4,
+    "uavB": 4,
+    "batB": 5,
+    "uavC": 4,
+    "batC": 6,
+    "relay": 4,
+    "relay_comp": 6
+   }
+  },
+  {
+   "method": "Ward (geo+demand)",
+   "K": 2,
+   "feasible": true,
+   "parts": [
+    [
+     "S001"
+    ],
+    [
+     "S002",
+     "S003",
+     "S004",
+     "S005",
+     "S006",
+     "S007",
+     "S008",
+     "S009",
+     "S010",
+     "S011",
+     "S012",
+     "S013",
+     "S014",
+     "S015"
+    ]
+   ],
+   "group_sizes": [
+    1,
+    14
+   ],
+   "min_size_ok": false,
+   "D": 29,
+   "G": 4,
+   "J": 0.757,
+   "cross_u": 0,
+   "cross_extra": 0,
+   "need": {
+    "uavA": 4,
+    "batA": 4,
+    "uavB": 2,
+    "batB": 4,
+    "uavC": 4,
+    "batC": 6,
+    "relay": 2,
+    "relay_comp": 3
+   }
+  },
+  {
+   "method": "K-means (geo)",
+   "K": 3,
+   "feasible": true,
+   "parts": [
+    [
+     "S001",
+     "S010",
+     "S013",
+     "S014"
+    ],
+    [
+     "S002",
+     "S004",
+     "S005",
+     "S009",
+     "S012"
+    ],
+    [
+     "S003",
+     "S006",
+     "S007",
+     "S008",
+     "S011",
+     "S015"
+    ]
+   ],
+   "group_sizes": [
+    4,
+    5,
+    6
+   ],
+   "min_size_ok": true,
+   "D": 43,
+   "G": 15,
+   "J": 0.2285,
+   "cross_u": 3,
+   "cross_extra": 3,
+   "need": {
+    "uavA": 4,
+    "batA": 4,
+    "uavB": 5,
+    "batB": 6,
+    "uavC": 6,
+    "batC": 7,
+    "relay": 5,
+    "relay_comp": 6
+   }
+  },
+  {
+   "method": "K-means (geo+demand)",
+   "K": 3,
+   "feasible": true,
+   "parts": [
+    [
+     "S001"
+    ],
+    [
+     "S002",
+     "S003",
+     "S004",
+     "S005",
+     "S006",
+     "S007",
+     "S015"
+    ],
+    [
+     "S008",
+     "S009",
+     "S010",
+     "S011",
+     "S012",
+     "S013",
+     "S014"
+    ]
+   ],
+   "group_sizes": [
+    1,
+    7,
+    7
+   ],
+   "min_size_ok": false,
+   "D": 39,
+   "G": 11,
+   "J": 0.5382,
+   "cross_u": 3,
+   "cross_extra": 3,
+   "need": {
+    "uavA": 4,
+    "batA": 4,
+    "uavB": 4,
+    "batB": 5,
+    "uavC": 5,
+    "batC": 7,
+    "relay": 4,
+    "relay_comp": 6
+   }
+  },
+  {
+   "method": "Ward (geo)",
+   "K": 3,
+   "feasible": true,
+   "parts": [
+    [
+     "S001",
+     "S003",
+     "S006",
+     "S007",
+     "S008",
+     "S011",
+     "S015"
+    ],
+    [
+     "S002",
+     "S004",
+     "S005",
+     "S009",
+     "S012"
+    ],
+    [
+     "S010",
+     "S013",
+     "S014"
+    ]
+   ],
+   "group_sizes": [
+    3,
+    5,
+    7
+   ],
+   "min_size_ok": true,
+   "D": 40,
+   "G": 12,
+   "J": 0.463,
+   "cross_u": 3,
+   "cross_extra": 3,
+   "need": {
+    "uavA": 4,
+    "batA": 4,
+    "uavB": 5,
+    "batB": 6,
+    "uavC": 4,
+    "batC": 6,
+    "relay": 5,
+    "relay_comp": 6
+   }
+  },
+  {
+   "method": "Ward (geo+demand)",
+   "K": 3,
+   "feasible": true,
+   "parts": [
+    [
+     "S001"
+    ],
+    [
+     "S002",
+     "S003",
+     "S004",
+     "S005",
+     "S006",
+     "S007",
+     "S008",
+     "S011",
+     "S015"
+    ],
+    [
+     "S009",
+     "S010",
+     "S012",
+     "S013",
+     "S014"
+    ]
+   ],
+   "group_sizes": [
+    1,
+    5,
+    9
+   ],
+   "min_size_ok": false,
+   "D": 36,
+   "G": 9,
+   "J": 0.6738,
+   "cross_u": 2,
+   "cross_extra": 2,
+   "need": {
+    "uavA": 4,
+    "batA": 4,
+    "uavB": 4,
+    "batB": 5,
+    "uavC": 4,
+    "batC": 6,
+    "relay": 4,
+    "relay_comp": 5
+   }
+  },
+  {
+   "method": "SC-MAE-RG (proposed)",
+   "K": 2,
+   "feasible": true,
+   "parts": [
+    [
+     "S001",
+     "S002",
+     "S003",
+     "S004",
+     "S005",
+     "S006",
+     "S007",
+     "S008",
+     "S009",
+     "S011",
+     "S015"
+    ],
+    [
+     "S010",
+     "S012",
+     "S013",
+     "S014"
+    ]
+   ],
+   "group_sizes": [
+    4,
+    11
+   ],
+   "min_size_ok": true,
+   "D": 31,
+   "G": 5,
+   "J": 0.6131,
+   "cross_u": 1,
+   "cross_extra": 1,
+   "need": {
+    "uavA": 4,
+    "batA": 4,
+    "uavB": 4,
+    "batB": 6,
+    "uavC": 2,
+    "batC": 4,
+    "relay": 3,
+    "relay_comp": 4
+   }
+  },
+  {
+   "method": "SC-MAE-RG (proposed)",
+   "K": 3,
+   "feasible": true,
+   "parts": [
+    [
+     "S001",
+     "S002",
+     "S004",
+     "S005",
+     "S008",
+     "S009",
+     "S011"
+    ],
+    [
+     "S003",
+     "S006",
+     "S007",
+     "S015"
+    ],
+    [
+     "S010",
+     "S012",
+     "S013",
+     "S014"
+    ]
+   ],
+   "group_sizes": [
+    4,
+    4,
+    7
+   ],
+   "min_size_ok": true,
+   "D": 38,
+   "G": 10,
+   "J": 0.4375,
+   "cross_u": 3,
+   "cross_extra": 3,
+   "need": {
+    "uavA": 4,
+    "batA": 4,
+    "uavB": 5,
+    "batB": 6,
+    "uavC": 3,
+    "batC": 5,
+    "relay": 5,
+    "relay_comp": 6
+   }
+  }
+ ],
+ "paper_D31_G5_J0613": {
+  "D": 31,
+  "G": 5,
+  "J": 0.613,
+  "note": "values quoted in manuscript"
+ }
+}

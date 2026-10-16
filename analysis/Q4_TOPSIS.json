@@ -1,0 +1,175 @@
+{
+ "weights": {
+  "质量": 0.4122,
+  "体积": 0.3852,
+  "距离": 0.1061,
+  "海拔": 0.0966
+ },
+ "rows": [
+  {
+   "sa": "S001",
+   "mass": 154.0,
+   "vol": 0.394,
+   "dist": 3063.4,
+   "elev": 154.0,
+   "first": 2,
+   "norm": 0.6525,
+   "closeness": 0.8948,
+   "rank": 1
+  },
+  {
+   "sa": "S002",
+   "mass": 81.0,
+   "vol": 0.211,
+   "dist": 7435.3,
+   "elev": 189.5,
+   "first": 2,
+   "norm": 0.3432,
+   "closeness": 0.4379,
+   "rank": 3
+  },
+  {
+   "sa": "S003",
+   "mass": 81.0,
+   "vol": 0.211,
+   "dist": 7261.1,
+   "elev": 308.5,
+   "first": 2,
+   "norm": 0.3432,
+   "closeness": 0.4406,
+   "rank": 2
+  },
+  {
+   "sa": "S004",
+   "mass": 59.0,
+   "vol": 0.156,
+   "dist": 7745.7,
+   "elev": 198.3,
+   "first": 2,
+   "norm": 0.25,
+   "closeness": 0.2744,
+   "rank": 4
+  },
+  {
+   "sa": "S005",
+   "mass": 59.0,
+   "vol": 0.156,
+   "dist": 5302.0,
+   "elev": 165.0,
+   "first": 2,
+   "norm": 0.25,
+   "closeness": 0.2678,
+   "rank": 6
+  },
+  {
+   "sa": "S006",
+   "mass": 59.0,
+   "vol": 0.156,
+   "dist": 3181.0,
+   "elev": 284.8,
+   "first": 2,
+   "norm": 0.25,
+   "closeness": 0.2681,
+   "rank": 5
+  },
+  {
+   "sa": "S007",
+   "mass": 45.0,
+   "vol": 0.129,
+   "dist": 4533.8,
+   "elev": 318.5,
+   "first": 2,
+   "norm": 0.1907,
+   "closeness": 0.1782,
+   "rank": 8
+  },
+  {
+   "sa": "S008",
+   "mass": 45.0,
+   "vol": 0.129,
+   "dist": 8109.5,
+   "elev": 240.9,
+   "first": 2,
+   "norm": 0.1907,
+   "closeness": 0.1874,
+   "rank": 7
+  },
+  {
+   "sa": "S009",
+   "mass": 25.0,
+   "vol": 0.067,
+   "dist": 5722.7,
+   "elev": 200.0,
+   "first": 2,
+   "norm": 0.1059,
+   "closeness": 0.0448,
+   "rank": 14
+  },
+  {
+   "sa": "S010",
+   "mass": 25.0,
+   "vol": 0.067,
+   "dist": 4778.4,
+   "elev": 321.6,
+   "first": 2,
+   "norm": 0.1059,
+   "closeness": 0.0557,
+   "rank": 13
+  },
+  {
+   "sa": "S011",
+   "mass": 25.0,
+   "vol": 0.067,
+   "dist": 2817.1,
+   "elev": 182.1,
+   "first": 2,
+   "norm": 0.1059,
+   "closeness": 0.0084,
+   "rank": 15
+  },
+  {
+   "sa": "S012",
+   "mass": 25.0,
+   "vol": 0.067,
+   "dist": 7398.4,
+   "elev": 249.8,
+   "first": 2,
+   "norm": 0.1059,
+   "closeness": 0.071,
+   "rank": 10
+  },
+  {
+   "sa": "S013",
+   "mass": 25.0,
+   "vol": 0.067,
+   "dist": 4848.7,
+   "elev": 321.7,
+   "first": 2,
+   "norm": 0.1059,
+   "closeness": 0.0562,
+   "rank": 12
+  },
+  {
+   "sa": "S014",
+   "mass": 25.0,
+   "vol": 0.067,
+   "dist": 5410.9,
+   "elev": 321.0,
+   "first": 2,
+   "norm": 0.1059,
+   "closeness": 0.0605,
+   "rank": 11
+  },
+  {
+   "sa": "S015",
+   "mass": 25.0,
+   "vol": 0.067,
+   "dist": 6019.1,
+   "elev": 444.5,
+   "first": 2,
+   "norm": 0.1059,
+   "closeness": 0.0916,
+   "rank": 9
+  }
+ ]
+}

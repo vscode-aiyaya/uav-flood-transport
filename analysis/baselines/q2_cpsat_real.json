@@ -1,0 +1,235 @@
+{
+ "instance": "real_20trip",
+ "time_limit_s": 300.0,
+ "seed": 20251015,
+ "greedy": {
+  "Cmax_s": 8849.33,
+  "Cmax_h": 2.4581,
+  "E_kWh": 67.3834,
+  "hard_late": 0,
+  "soft_min": 126.52,
+  "wall_s": 0.0002
+ },
+ "cpsat": {
+  "Cmax_s": 7584.0,
+  "Cmax_h": 2.1067,
+  "E_kWh": 64.309,
+  "hard_late": 0,
+  "soft_min": 5.28,
+  "wall_s": 0.305,
+  "optimal": true,
+  "objective": 758400643407.0,
+  "bound": 758400643407.0,
+  "gap_pct": 0.0
+ },
+ "independent_verify": {
+  "passed": true,
+  "Cmax_h": 2.1064,
+  "E_kWh": 64.3097,
+  "hard_late": 0,
+  "soft_min": 5.28,
+  "cp_vs_continuous_Cmax_diff_s": 1.0
+ },
+ "cpsat_assignment": [
+  {
+   "tid": "T01",
+   "mt": "C",
+   "aircraft": "C1",
+   "battery": "C4",
+   "start": 0.0,
+   "return_s": 1189.4,
+   "E": 2.9263,
+   "soc": 0.6342
+  },
+  {
+   "tid": "T02",
+   "mt": "C",
+   "aircraft": "C1",
+   "battery": "C2",
+   "start": 1190.0,
+   "return_s": 2289.4,
+   "E": 3.0047,
+   "soc": 0.6244
+  },
+  {
+   "tid": "T03",
+   "mt": "B",
+   "aircraft": "B2",
+   "battery": "B4",
+   "start": 0.0,
+   "return_s": 1579.9,
+   "E": 2.7219,
+   "soc": 0.3195
+  },
+  {
+   "tid": "T04",
+   "mt": "C",
+   "aircraft": "C2",
+   "battery": "C1",
+   "start": 1165.0,
+   "return_s": 2850.0,
+   "E": 5.7394,
+   "soc": 0.2826
+  },
+  {
+   "tid": "T05",
+   "mt": "C",
+   "aircraft": "C2",
+   "battery": "C3",
+   "start": 0.0,
+   "return_s": 1164.9,
+   "E": 2.594,
+   "soc": 0.6758
+  },
+  {
+   "tid": "T06",
+   "mt": "B",
+   "aircraft": "B1",
+   "battery": "B3",
+   "start": 1271.0,
+   "return_s": 2585.6,
+   "E": 1.821,
+   "soc": 0.5447
+  },
+  {
+   "tid": "T07",
+   "mt": "B",
+   "aircraft": "B2",
+   "battery": "B2",
+   "start": 1580.0,
+   "return_s": 3263.8,
+   "E": 2.7552,
+   "soc": 0.3112
+  },
+  {
+   "tid": "T08",
+   "mt": "B",
+   "aircraft": "B1",
+   "battery": "B1",
+   "start": 0.0,
+   "return_s": 1270.4,
+   "E": 1.8246,
+   "soc": 0.5439
+  },
+  {
+   "tid": "T09",
+   "mt": "A",
+   "aircraft": "A1",
+   "battery": "A6",
+   "start": 1779.0,
+   "return_s": 3296.3,
+   "E": 1.9051,
+   "soc": 0.5766
+  },
+  {
+   "tid": "T10",
+   "mt": "A",
+   "aircraft": "A1",
+   "battery": "A5",
+   "start": 0.0,
+   "return_s": 1779.0,
+   "E": 2.2877,
+   "soc": 0.4916
+  },
+  {
+   "tid": "T11",
+   "mt": "B",
+   "aircraft": "B1",
+   "battery": "B4",
+   "start": 4319.0,
+   "return_s": 6159.2,
+   "E": 2.7792,
+   "soc": 0.3052
+  },
+  {
+   "tid": "T12",
+   "mt": "C",
+   "aircraft": "C2",
+   "battery": "C1",
+   "start": 5239.0,
+   "return_s": 7248.8,
+   "E": 5.7634,
+   "soc": 0.2796
+  },
+  {
+   "tid": "T13",
+   "mt": "C",
+   "aircraft": "C1",
+   "battery": "C2",
+   "start": 4189.0,
+   "return_s": 6098.2,
+   "E": 6.1769,
+   "soc": 0.2279
+  },
+  {
+   "tid": "T14",
+   "mt": "B",
+   "aircraft": "B2",
+   "battery": "B2",
+   "start": 5611.0,
+   "return_s": 7306.9,
+   "E": 2.6774,
+   "soc": 0.3307
+  },
+  {
+   "tid": "T15",
+   "mt": "B",
+   "aircraft": "B1",
+   "battery": "B1",
+   "start": 2729.0,
+   "return_s": 4318.6,
+   "E": 2.3109,
+   "soc": 0.4223
+  },
+  {
+   "tid": "T16",
+   "mt": "C",
+   "aircraft": "C1",
+   "battery": "C3",
+   "start": 6099.0,
+   "return_s": 7583.0,
+   "E": 4.2388,
+   "soc": 0.4702
+  },
+  {
+   "tid": "T17",
+   "mt": "B",
+   "aircraft": "B1",
+   "battery": "B1",
+   "start": 6160.0,
+   "return_s": 7480.8,
+   "E": 2.1025,
+   "soc": 0.4744
+  },
+  {
+   "tid": "T18",
+   "mt": "C",
+   "aircraft": "C2",
+   "battery": "C4",
+   "start": 2851.0,
+   "return_s": 4839.4,
+   "E": 5.7482,
+   "soc": 0.2815
+  },
+  {
+   "tid": "T19",
+   "mt": "C",
+   "aircraft": "C1",
+   "battery": "C3",
+   "start": 2701.0,
+   "return_s": 4188.5,
+   "E": 3.1507,
+   "soc": 0.6062
+  },
+  {
+   "tid": "T20",
+   "mt": "B",
+   "aircraft": "B2",
+   "battery": "B3",
+   "start": 4042.0,
+   "return_s": 5610.6,
+   "E": 1.782,
+   "soc": 0.5545
+  }
+ ]
+}

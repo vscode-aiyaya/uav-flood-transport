@@ -1,0 +1,529 @@
+{
+ "inventory": {
+  "uavA": 4,
+  "uavB": 2,
+  "uavC": 2,
+  "batA": 6,
+  "batB": 4,
+  "batC": 4,
+  "relay": 2,
+  "relay_comp": 6
+ },
+ "global_need": {
+  "uavA": 4,
+  "batA": 4,
+  "uavB": 2,
+  "batB": 4,
+  "uavC": 2,
+  "batC": 4,
+  "relay": 2,
+  "relay_comp": 3
+ },
+ "global_detail": [
+  {
+   "group": 1,
+   "sas": [
+    "S001",
+    "S002",
+    "S003",
+    "S004",
+    "S005",
+    "S006",
+    "S007",
+    "S008",
+    "S009",
+    "S010",
+    "S011",
+    "S012",
+    "S013",
+    "S014",
+    "S015"
+   ],
+   "boxes": 80,
+   "mass": 758.0,
+   "vol": 2.011,
+   "first": 30,
+   "avg_dist": 5575.1,
+   "trips": [
+    "T01",
+    "T02",
+    "T03",
+    "T04",
+    "T05",
+    "T06",
+    "T07",
+    "T08",
+    "T09",
+    "T10",
+    "T11",
+    "T12",
+    "T13",
+    "T14",
+    "T15",
+    "T16",
+    "T17",
+    "T18",
+    "T19",
+    "T20"
+   ],
+   "n_trips": 20,
+   "energy": 65.2475,
+   "relay_whole": [
+    "R01M1",
+    "R01M2",
+    "R02M1",
+    "R02M2"
+   ],
+   "relay_cross": [],
+   "need": {
+    "uavA": 4,
+    "batA": 4,
+    "uavB": 2,
+    "batB": 4,
+    "uavC": 2,
+    "batC": 4,
+    "relay": 2,
+    "relay_comp": 3
+   }
+  }
+ ],
+ "K2": {
+  "parts": [
+   [
+    "S001",
+    "S002",
+    "S003",
+    "S004",
+    "S005",
+    "S006",
+    "S007",
+    "S008",
+    "S009",
+    "S011",
+    "S015"
+   ],
+   [
+    "S010",
+    "S012",
+    "S013",
+    "S014"
+   ]
+  ],
+  "detail": [
+   {
+    "group": 1,
+    "sas": [
+     "S001",
+     "S002",
+     "S003",
+     "S004",
+     "S005",
+     "S006",
+     "S007",
+     "S008",
+     "S009",
+     "S011",
+     "S015"
+    ],
+    "boxes": 68,
+    "mass": 658.0,
+    "vol": 1.743,
+    "first": 22,
+    "avg_dist": 5562.8,
+    "trips": [
+     "T01",
+     "T02",
+     "T03",
+     "T04",
+     "T05",
+     "T09",
+     "T11",
+     "T12",
+     "T13",
+     "T14",
+     "T15",
+     "T16",
+     "T17",
+     "T18",
+     "T19"
+    ],
+    "n_trips": 15,
+    "energy": 54.3736,
+    "relay_whole": [
+     "R01M2",
+     "R02M1",
+     "R02M2"
+    ],
+    "relay_cross": [
+     "R01M1"
+    ],
+    "need": {
+     "uavA": 2,
+     "batA": 2,
+     "uavB": 2,
+     "batB": 3,
+     "uavC": 2,
+     "batC": 4,
+     "relay": 2,
+     "relay_comp": 3
+    }
+   },
+   {
+    "group": 2,
+    "sas": [
+     "S010",
+     "S012",
+     "S013",
+     "S014"
+    ],
+    "boxes": 12,
+    "mass": 100.0,
+    "vol": 0.268,
+    "first": 8,
+    "avg_dist": 5609.1,
+    "trips": [
+     "T06",
+     "T07",
+     "T08",
+     "T10",
+     "T20"
+    ],
+    "n_trips": 5,
+    "energy": 10.8739,
+    "relay_whole": [],
+    "relay_cross": [
+     "R01M1"
+    ],
+    "need": {
+     "uavA": 2,
+     "batA": 2,
+     "uavB": 2,
+     "batB": 3,
+     "uavC": 0,
+     "batC": 0,
+     "relay": 1,
+     "relay_comp": 1
+    }
+   }
+  ],
+  "need": {
+   "uavA": 4,
+   "batA": 4,
+   "uavB": 4,
+   "batB": 6,
+   "uavC": 2,
+   "batC": 4,
+   "relay": 3,
+   "relay_comp": 4
+  },
+  "gap": {
+   "uavA": 0,
+   "batA": 0,
+   "uavB": 2,
+   "batB": 2,
+   "uavC": 0,
+   "batC": 0,
+   "relay": 1,
+   "relay_comp": 0
+  },
+  "redun": {
+   "uavA": 0,
+   "batA": 0,
+   "uavB": 2,
+   "batB": 2,
+   "uavC": 0,
+   "batC": 0,
+   "relay": 1,
+   "relay_comp": 1
+  },
+  "D": 31,
+  "G": 5,
+  "J": 0.6131120135215917,
+  "cross": [
+   1,
+   1
+  ],
+  "cross_t": 2,
+  "cross_u": 1,
+  "cross_extra": 1
+ },
+ "K3": {
+  "parts": [
+   [
+    "S001",
+    "S002",
+    "S004",
+    "S005",
+    "S008",
+    "S009",
+    "S011"
+   ],
+   [
+    "S003",
+    "S006",
+    "S007",
+    "S015"
+   ],
+   [
+    "S010",
+    "S012",
+    "S013",
+    "S014"
+   ]
+  ],
+  "detail": [
+   {
+    "group": 1,
+    "sas": [
+     "S001",
+     "S002",
+     "S004",
+     "S005",
+     "S008",
+     "S009",
+     "S011"
+    ],
+    "boxes": 46,
+    "mass": 448.0,
+    "vol": 1.18,
+    "first": 14,
+    "avg_dist": 5742.2,
+    "trips": [
+     "T01",
+     "T02",
+     "T03",
+     "T04",
+     "T13",
+     "T14",
+     "T16",
+     "T17",
+     "T18"
+    ],
+    "n_trips": 9,
+    "energy": 35.8703,
+    "relay_whole": [],
+    "relay_cross": [
+     "R01M1",
+     "R02M1",
+     "R02M2"
+    ],
+    "need": {
+     "uavA": 1,
+     "batA": 1,
+     "uavB": 1,
+     "batB": 1,
+     "uavC": 2,
+     "batC": 3,
+     "relay": 2,
+     "relay_comp": 3
+    }
+   },
+   {
+    "group": 2,
+    "sas": [
+     "S003",
+     "S006",
+     "S007",
+     "S015"
+    ],
+    "boxes": 22,
+    "mass": 210.0,
+    "vol": 0.563,
+    "first": 8,
+    "avg_dist": 5248.8,
+    "trips": [
+     "T05",
+     "T09",
+     "T11",
+     "T12",
+     "T15",
+     "T19"
+    ],
+    "n_trips": 6,
+    "energy": 18.5033,
+    "relay_whole": [
+     "R01M2"
+    ],
+    "relay_cross": [
+     "R02M1",
+     "R02M2"
+    ],
+    "need": {
+     "uavA": 1,
+     "batA": 1,
+     "uavB": 2,
+     "batB": 2,
+     "uavC": 1,
+     "batC": 2,
+     "relay": 2,
+     "relay_comp": 2
+    }
+   },
+   {
+    "group": 3,
+    "sas": [
+     "S010",
+     "S012",
+     "S013",
+     "S014"
+    ],
+    "boxes": 12,
+    "mass": 100.0,
+    "vol": 0.268,
+    "first": 8,
+    "avg_dist": 5609.1,
+    "trips": [
+     "T06",
+     "T07",
+     "T08",
+     "T10",
+     "T20"
+    ],
+    "n_trips": 5,
+    "energy": 10.8739,
+    "relay_whole": [],
+    "relay_cross": [
+     "R01M1"
+    ],
+    "need": {
+     "uavA": 2,
+     "batA": 2,
+     "uavB": 2,
+     "batB": 3,
+     "uavC": 0,
+     "batC": 0,
+     "relay": 1,
+     "relay_comp": 1
+    }
+   }
+  ],
+  "need": {
+   "uavA": 4,
+   "batA": 4,
+   "uavB": 5,
+   "batB": 6,
+   "uavC": 3,
+   "batC": 5,
+   "relay": 5,
+   "relay_comp": 6
+  },
+  "gap": {
+   "uavA": 0,
+   "batA": 0,
+   "uavB": 3,
+   "batB": 2,
+   "uavC": 1,
+   "batC": 1,
+   "relay": 3,
+   "relay_comp": 0
+  },
+  "redun": {
+   "uavA": 0,
+   "batA": 0,
+   "uavB": 3,
+   "batB": 2,
+   "uavC": 1,
+   "batC": 1,
+   "relay": 3,
+   "relay_comp": 3
+  },
+  "D": 38,
+  "G": 10,
+  "J": 0.4375124382960816,
+  "cross": [
+   3,
+   2,
+   1
+  ],
+  "cross_t": 6,
+  "cross_u": 3,
+  "cross_extra": 3
+ },
+ "zero_cross": {
+  "K2": {
+   "need": {
+    "uavA": 4,
+    "batA": 4,
+    "uavB": 2,
+    "batB": 4,
+    "uavC": 4,
+    "batC": 7,
+    "relay": 2,
+    "relay_comp": 3
+   },
+   "gap": {
+    "uavA": 0,
+    "batA": 0,
+    "uavB": 0,
+    "batB": 0,
+    "uavC": 2,
+    "batC": 3,
+    "relay": 0,
+    "relay_comp": 0
+   },
+   "redun": {
+    "uavA": 0,
+    "batA": 0,
+    "uavB": 0,
+    "batB": 0,
+    "uavC": 2,
+    "batC": 3,
+    "relay": 0,
+    "relay_comp": 0
+   },
+   "D": 30,
+   "G": 5,
+   "J": NaN,
+   "cross": [
+    0,
+    0
+   ],
+   "cross_t": 0,
+   "cross_u": 0,
+   "cross_extra": 0
+  },
+  "K3": {
+   "need": {
+    "uavA": 4,
+    "batA": 4,
+    "uavB": 2,
+    "batB": 4,
+    "uavC": 5,
+    "batC": 7,
+    "relay": 2,
+    "relay_comp": 3
+   },
+   "gap": {
+    "uavA": 0,
+    "batA": 0,
+    "uavB": 0,
+    "batB": 0,
+    "uavC": 3,
+    "batC": 3,
+    "relay": 0,
+    "relay_comp": 0
+   },
+   "redun": {
+    "uavA": 0,
+    "batA": 0,
+    "uavB": 0,
+    "batB": 0,
+    "uavC": 3,
+    "batC": 3,
+    "relay": 0,
+    "relay_comp": 0
+   },
+   "D": 31,
+   "G": 6,
+   "J": NaN,
+   "cross": [
+    0,
+    0,
+    0
+   ],
+   "cross_t": 0,
+   "cross_u": 0,
+   "cross_extra": 0
+  }
+ }
+}
