@@ -1,6 +1,6 @@
 % =====================================================================
-%  Coupled UAV transportation and communication scheduling in mountain
-%  flood disaster relief -- IEEE journal manuscript.
+%  Multi-hover-point relay scheduling for UAV emergency delivery under a fixed
+%  transport plan in mountain flood disaster relief -- IEEE journal manuscript.
 %  Compile with:  pdflatex main_en.tex
 % =====================================================================
 \documentclass[journal]{IEEEtran}
@@ -30,51 +30,49 @@
 
 \begin{document}
 
-\title{A Unified Multi-Model Framework for Coupled UAV Transportation and
-Communication Scheduling in Mountain Flood Disaster Relief}
+\title{Multi-Hover-Point Relay Scheduling for UAV Emergency Delivery under a
+Fixed Transport Plan}
 
-\author{
-\IEEEauthorblockN{Yang Xin\textsuperscript{*}, Zhao Zidong, Song Yuwei}
-\IEEEauthorblockA{\textit{School of Mechanical and Power Engineering, Zhengzhou University}\\
+\author{Yang Xin\textsuperscript{*}, Zhao Zidong, Song Yuwei\\
+\textit{School of Mechanical and Power Engineering, Zhengzhou University}\\
 Zhengzhou, Henan 450001, China\\
-Email: xinyang.zzu@outlook.com}
+Email: xinyang.zzu@outlook.com
 \thanks{\textsuperscript{*}Corresponding author: Yang Xin
 (e-mail: xinyang.zzu@outlook.com).}
 }
 
 \maketitle
 \markboth{Manuscript for Review, October 2026}%
-{Yang \MakeLowercase{\textit{et al.}}: A Unified Multi-Model Framework for Coupled UAV Transportation and Communication Scheduling}
+{Yang \MakeLowercase{\textit{et al.}}: Multi-Hover-Point Relay Scheduling for UAV Emergency Delivery under a Fixed Transport Plan}
 
 \begin{abstract}
-Mountain floods damage roads and communication facilities simultaneously, so
-ground vehicles can hardly enter the affected areas and UAVs become a key means
-of material delivery and communication support. Severe terrain relief, strict
-task deadlines and the tight coupling between transportation and communication
-call for both to be planned under one physical caliber. This paper builds a
-``transport scheduling--communication support--resource allocation'' chain
-solved in four sequential stages; its central stage minimizes the relay
-resources that keep the delivery UAVs connected once their delivery plan is
-fixed, while batching, routing and partitioning generate and assess that plan.
+Mountain floods damage roads and communication facilities at once, so ground
+vehicles can hardly enter the affected areas and UAVs become a key means of
+delivery and communication support; severe relief, tight deadlines and the
+coupling between the two require a consistent physical model. The paper builds a
+``transport scheduling--communication support--resource allocation'' chain solved
+in four sequential stages: the transport plan is fixed first and the central stage
+constructs a relay schedule meeting coverage, energy and resource constraints.
 Problem 1 (DEM-ELBPP) is an energy-aware bin-packing model solved exactly by
-set-partitioning dynamic programming, giving an 18-trip plan at 59.24~kWh that
-saves 0.69\% of energy over a greedy FFD/BFD baseline on the same instance.
-Problem 2 (HF-VRPBT) adds heterogeneous fleet routing with time windows and
-recommends a 20-trip plan at 65.25~kWh satisfying all 31 hard deadlines.
-Problem 3 (TD-CJO) introduces a \emph{multi-hover-point direct-transfer} relay
-mode: two relay UAVs cover all 11683 sampled relay-required points (11615 unique
-sortie--time pairs) on the 1-s grid (relay energy 5.43~kWh, joint 70.68~kWh),
-whereas a single-hover baseline covers only 62.7\% with two UAVs and 82.1\% with
-three, so the mode is what makes grid-level full coverage attainable.
-Problem 4 (SC-MAE-RG) compares $K{=}2$ and $K{=}3$ partitions (31/38
-units, gaps 5/10) and recommends $K{=}2$. An independent recomputation reproduces
-the point count within 0.3\% and the relay energy within 1.6\%, and the weakest
-relay link keeps 0.34~dB of margin over the $-90$~dBm threshold.
+set-partitioning dynamic programming, giving an 18-trip plan at 59.24~kWh,
+0.69\% below greedy FFD/BFD batching on that instance. Problem 2
+(HF-VRPBT) adds heterogeneous fleet routing with time windows and recommends a
+20-trip plan at 65.25~kWh satisfying all 31 hard deadlines. Problem 3 introduces
+a \emph{multi-hover-point direct-transfer} relay mode: two relay UAVs cover all
+11,713 relay-required samples on the 1-s grid (11,645 unique sortie--time pairs)
+at a relay energy of 5.50~kWh, whereas the tested single-hover heuristics attain
+only 51.0\%, 62.7\% and 82.1\% with one, two and three airframes. On the test
+instance at least two relay airframes must be simultaneously active: two windows
+overlap by 759.8~s with centroids 7188.5~m apart and no single hover point covers
+both. Problem 4 (SC-MAE-RG) compares $K{=}2$ and $K{=}3$ partitions and
+recommends $K{=}2$. A rebuild of the frozen relay plan reproduces the
+relay-required count within 0.3\% and the relay energy within 1.2\%; the weakest
+relay link keeps 0.22~dB of margin above $-90$~dBm.
 \end{abstract}
 
 \begin{IEEEkeywords}
-mountain flood, UAV transportation scheduling, communication relay deployment,
-multi-model fusion, resource-gap accounting
+mountain flood, UAV transportation scheduling, multi-hover-point relay
+scheduling, communication coverage, resource-gap accounting
 \end{IEEEkeywords}
 
 % =====================================================================
@@ -104,16 +102,15 @@ must be organized jointly under blocked roads, tight energy budgets and
 incomplete information.
 
 From a technical viewpoint, completing delivery depends not only on whether a
-UAV can reach the target area, but also on payload, horizontal flight distance,
-climb/descent height, along-route terrain clearance, energy reservation, task
-deadlines and equipment turnover. Meanwhile, a transportation UAV must maintain
-command, telemetry and hand-over links during climb, cruise, descent and
-hand-over; when fixed communication facilities are damaged or terrain blocks the
+UAV can reach the target area, but also on payload, flight distance, climb
+height, along-route terrain clearance, energy reservation, deadlines and
+equipment turnover. A transportation UAV must also maintain
+command, telemetry and hand-over links during climb, cruise and
+descent; when fixed facilities are damaged or terrain blocks the
 ground gateway, airborne relay UAVs must provide temporary coverage at suitable
-positions and time windows. Therefore, material delivery under mountain floods
-involves transportation organization plus simultaneous communication support and
-equipment-resource coordination --- a typical transportation--communication--
-resource coupled optimization problem.
+positions and time windows. Material delivery under mountain floods therefore
+couples transportation, communication support and equipment-resource
+coordination.
 
 The four stages studied here are ordered by dependency rather than by
 convention. Batching (Problem 1) fixes the indivisible unit loads and their
@@ -124,16 +121,21 @@ batches. Relay scheduling (Problem 3) is meaningful only after the routing
 timeline exists, since the relay demand is exactly the set of trajectory points
 whose link to the gateway fails. Finally, resource partitioning (Problem 4)
 accounts peak concurrency on the joint plan, so it must come last. Each stage
-therefore consumes only the outputs of its predecessors, which is what allows
-one physical caliber to run through the whole chain without re-fitting.
+therefore consumes only the outputs of its predecessors, which is what allows a
+single consistent physical model to run through the whole chain without
+re-fitting. Transportation and communication are physically and temporally
+coupled --- the relay demand is generated by the transport trajectories --- but
+the chain solves them sequentially rather than jointly, so no joint
+transport--communication optimum is claimed here. Batching and routing form an
+input-generating module, resource partitioning is an extension analysis, and
+relay scheduling under the fixed transport plan is the core of this paper.
 
 \subsection{Related Work}
 % ---------------------------------------------------------------------
-Relay deployment under terrain blockage has been shown to be critical for link
-quality: \cite{cuu2026} showed that even a single well-placed relay can
-significantly improve link reliability in UAV-assisted robust communication link
-design. In emergency logistics, \cite{wu2024} built a transportation-path
-optimization model revealing the necessity of a timeliness--energy trade-off.
+Relay deployment under terrain blockage is critical for link quality:
+\cite{cuu2026} showed that even a single well-placed relay can significantly
+improve link reliability, and in emergency logistics \cite{wu2024} revealed a
+timeliness--energy trade-off.
 Cellular-connected cargo delivery and joint UAV--ground routing have since been
 studied extensively, including trajectory optimization for cellular-connected
 delivery fleets \cite{cao2024}, joint delivery routing of UAVs and ground
@@ -152,23 +154,24 @@ of tethered multi-UAV transportation under low communication, and \cite{li2026}
 surveyed UAV--UGV collaborative sensing for low-altitude transportation.
 Heterogeneous multi-UAV swarms \cite{ma2020} and two-stage UAV facility location
 and scheduling with objective-robustness optimization \cite{guo2026} are also
-closely related. These studies, however, treat transportation planning and
-communication provisioning \emph{separately}: routing works rarely enforce
-continuous link coverage, while communication works rarely account for payload,
-deadline and battery-turnover limits. The two closest studies still leave the
-coupling open: the objective-robust siting model of \cite{guo2026} decides
-where facilities stand but not how airborne links are maintained during
-delivery, and the UAV--UGV sensing survey of \cite{li2026} catalogs
-collaboration patterns without a joint transport--communication optimizer. Two
-further works couple the two sides more directly: \cite{yanmaz2023} quantifies
-the penalty of decoupled versus joint multi-UAV path planning for search and
-rescue, and \cite{soya2025} designs delivery-UAV routes that reserve multi-hop
-relays. Neither, however, carries payload, deadline or turnover constraints on a
-common caliber. The gap addressed here is therefore the
-joint, physically consistent modeling of transport batching, relay deployment and
-resource turnover inside one optimization chain. Table~\ref{tab:rw} positions the
-above studies against the three capabilities that the coupled problem requires
-simultaneously: continuous link coverage (L), payload/energy feasibility (P) and
+closely related. Most of these studies address either the transportation or the
+communication side: routing works rarely enforce continuous link coverage, while
+communication works rarely account for payload, deadline and battery-turnover
+limits. A few come closer: the siting model of \cite{guo2026} decides where
+ground facilities stand but not how airborne links are maintained during
+delivery; the sensing survey of \cite{li2026} catalogs collaboration patterns
+without a transport--communication optimizer; \cite{yanmaz2023} compares joint
+and decoupled multi-UAV path planning for search and rescue; and \cite{soya2025}
+designs delivery-UAV routes that reserve multi-hop relays. The last two,
+however, treat the relay as a static route constraint rather than a scheduled
+resource: neither decides the relay hover sequence, its transfer flights and
+link re-establishment, nor the turnover of a shared energy-component inventory
+over the transport timeline. The gap addressed here is therefore the sequential,
+physically consistent chain in which transport batching and routing are fixed
+first and the multi-hover-point relay schedule is then constructed under
+coverage, energy and resource constraints. Table~\ref{tab:rw} positions these
+works against the three capabilities the coupled problem requires simultaneously:
+continuous link coverage (L), payload/energy feasibility (P) and
 battery/component turnover (T).
 
 \begin{table}[t]
@@ -201,17 +204,20 @@ The main contributions are:
 \begin{itemize}
 \item \textbf{A unified, reproducible model chain.} We build a
 ``transport scheduling--communication support--resource allocation'' framework in
-which a single physical caliber (DEM-based cruise altitude, nonlinear equivalent
-range, climb additional energy and two-stage charging) runs through all four
-stages, so that results of successive stages are directly reusable.
+which a single consistent physical model (DEM-based cruise altitude, nonlinear
+equivalent range, climb additional energy and two-stage charging) runs through
+all four stages, so that results of successive stages are directly reusable. The
+chain is sequential: batching and routing are solved first and their outputs are
+fixed before the relay stage, which is the core contribution of this paper.
 \item \textbf{Multi-hover-point relay scheduling (MHPRS).} We formalize a relay
 mode in which one relay UAV serves several hover points within a single
-take-off/return cycle. Two relay UAVs then reach full mission coverage
-(11683/11683 sampled relay points), whereas a single-hover-point round-trip
-baseline covers only 62.7\% with two UAVs and 82.1\% with three --- even three
-single-hover relays leave 17.9\% of the sampled points unserved, so the transfer
-between hover points is the decisive factor. The formal definition and a
-mode-dominance proposition are given in Sec.~\ref{sec:mhprs}.
+take-off/return cycle. Two relay UAVs then cover all 11,713 sampled
+relay-required points on the 1-s grid, whereas the tested single-hover-point
+round-trip heuristics attain only 51.0\%, 62.7\% and 82.1\% with one, two and
+three airframes; on the test instance two transfer windows overlap and no single
+hover point can cover both, so at least two relay airframes are required. The
+formal definition, the mode-dominance proposition and this concurrency lower
+bound are given in Sec.~\ref{sec:mhprs}.
 \item \textbf{DEM-driven energy-aware bin packing.} We discretize continuous
 energy constraints into bin-packing feasibility, enabling exact batching (18
 trips) and a verified optimality benchmark. On the real instance the exact
@@ -237,7 +243,7 @@ after each take-off/service/return cycle. Fig.~\ref{fig:system} summarizes the
 overall architecture.
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.9\linewidth]{fig_system.pdf}
+\includegraphics[width=0.70\linewidth]{fig_system.pdf}
 \caption{UAV transportation--communication collaborative system architecture.}
 \label{fig:system}
 \end{figure}
@@ -367,14 +373,14 @@ $I_q$ & resource inventory vector & units \\
 We establish a ``transport--communication--resource'' collaborative
 optimization chain: with 30\,m DEM terrain, 15 service areas, 80 indivisible
 boxes and heterogeneous UAV fleets plus link parameters as unified inputs, we
-successively build DEM-ELBPP (Problem 1), HF-VRPBT (Problem 2), TD-CJO (Problem
+successively build DEM-ELBPP (Problem 1), HF-VRPBT (Problem 2), MHPRS (Problem
 3) and SC-MAE-RG (Problem 4). The four layers introduce return-safety margin and
 batching, deadline concurrency and battery turnover, full-process continuous
 communication, and partitioning resource allocation, respectively; the overall
 technical route is shown in Fig.~\ref{fig:route}.
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.9\linewidth]{fig_route.pdf}
+\includegraphics[width=0.70\linewidth]{fig_route.pdf}
 \caption{Overall technical route of the proposed framework.}
 \label{fig:route}
 \end{figure}
@@ -469,16 +475,15 @@ intractable, we enumerate a restricted candidate set (whole-area trips inherited
 from Problem 1, split first-batch tasks and short cross-area tours) and apply a
 deterministic urgency-first greedy schedule that inserts each trip for the task
 whose hard deadline is nearest while updating the affected airframe and battery
-occupancies. The three candidate classes play distinct roles: the inherited
-whole-area trips preserve the energy-optimality of the Problem-1 batches, the
-split first-batch tasks decouple the urgent first deliveries from the residual
-load of the same area so that hard deadlines can be met before the full batch
-would be ready, and the short cross-area tours absorb small residual loads that
-would otherwise each cost a dedicated round trip. At every insertion the
-scheduler recomputes the occupancy intervals of the chosen airframe and its
-battery, rejects placements that violate the mutual-exclusion or recharge
-conditions of the constraint set above, and leaves soft-deadline lateness to be
-priced by $L_{\mathrm{soft}}$ rather than blocking on it. The search evaluates 57
+occupancies. The three candidate classes play distinct roles: inherited whole-area trips
+preserve the energy-optimality of the Problem-1 batches, split first-batch tasks
+decouple the urgent first deliveries from the residual load so that hard
+deadlines can be met before the full batch is ready, and short cross-area tours
+absorb small residual loads that would otherwise each cost a dedicated round
+trip. At every insertion the scheduler recomputes the occupancy intervals of the
+chosen airframe and battery, rejects placements violating the mutual-exclusion or
+recharge conditions above, and leaves soft-deadline lateness to be priced by
+$L_{\mathrm{soft}}$. The search evaluates 57
 candidate plans and yields five non-dominated plans (Table~\ref{tab:pareto}):
 19 trips ($66.30$\,kWh), the recommended 20-trip plan ($65.25$\,kWh,
 $C_{\max}=2.72$\,h, soft delay $137.6$\,min), two further 20-trip plans that
@@ -487,7 +492,7 @@ the recommended 20-trip plan
 dominates on energy and completion time, uses all eight airframes and satisfies
 all 31 hard-deadline boxes.
 
-\subsection{Problem 3: Task-Driven Joint Transportation--Communication Scheduling (TD-CJO)}
+\subsection{Problem 3: Task-Driven Multi-Hover-Point Relay Scheduling (MHPRS)}
 \label{sec:mhprs}
 \subsubsection{Link feasibility}
 Link feasibility uses a free-space path-loss model with a binary DEM
@@ -514,39 +519,36 @@ cycle of one relay UAV serving an ordered sequence of hover points connected by
 direct-transfer flights; MHPRS is to cover all relay-required points by the
 minimum-cost set of sorties under link-budget, hover-height, resource-exclusion,
 return-SOC and component-inventory constraints.
-Classical relay placement asks where to install fixed relays so that a static
-set of terminals becomes connected, and it optimizes over positions only. MHPRS
-differs in three respects: (i) the demand is \emph{time-varying}, because
-relay-required points appear and disappear as the transport trips progress, so
-coverage is a spatio-temporal rather than a purely spatial requirement; (ii) a
-single relay airframe may serve an \emph{ordered sequence} of hover points
-within one sortie, and the transfer flight and link re-establishment between
-consecutive points consume time and energy that must enter the constraints; and
-(iii) energy, hover-height and component-turnover limits bind the solution,
-since only two relay airframes share a finite inventory of six energy
-components. Formally, the constraints are the full-process coverage condition
-(each transport point is either directly connected to G01 or lies in some
-sortie's service interval with both hops above threshold), relay-before-task
+Classical relay placement installs fixed relays so that a static set of
+terminals becomes connected and optimizes positions only. MHPRS differs in three
+respects: (i) the demand is \emph{time-varying}, since relay-required points
+appear and disappear as the transport trips progress, so coverage is
+spatio-temporal rather than purely spatial; (ii) one airframe may serve an
+\emph{ordered sequence} of hover points within one sortie, and the transfer
+flight and link re-establishment between consecutive points consume time and
+energy that enter the constraints; and (iii) only two airframes share six energy
+components, so hover-height, energy and component-turnover limits bind the
+solution. Formally, the constraints comprise full-process coverage (each
+transport point is either directly connected to G01 or lies in some sortie's
+service interval with both hops above threshold), relay-before-task
 $s_c\le\min\{t_p\}$, bidirectional link budget
 $\mathrm{RSRP}\ge P_{\mathrm{thr}}$, hover-height limit
 $h_c\le h^{\mathrm{terr}}_c+300$\,m, resource exclusion, return SOC $\ge0.20$,
-component inventory (in-flight plus charging components $\le6$), coverage rate
+component inventory (in-flight plus charging $\le6$), coverage rate
 $\ge\eta_{\mathrm{target}}$, and the transfer--link-establish timing between
-consecutive segments. The coverage rate is the fraction of verified
-relay-required trajectory points, counted after removing duplicate
-boundary samples between consecutive flight segments so that no point is
-counted twice.
+consecutive segments; the coverage rate counts verified relay-required
+trajectory points after removing duplicate boundary samples between consecutive
+segments so that no point is counted twice.
 
-The solution procedure mirrors this structure. Relay-required points are
-clustered into service intervals by temporal gaps larger than $400$\,s;
-candidate hover points are generated on the $0.01^\circ$ DEM grid within
-$300$\,m above ground and $12$\,km of the depot, keeping only points from
-which every relay-required point of a segment passes the bidirectional link
-budget. A greedy pass selects the fewest candidates per interval, splitting
-the interval at its median time whenever a segment remains uncovered, and the
-resulting adjacent segments are packed into sorties under the component
-inventory and return-SOC constraints with earliest-available assignment of
-the two airframes.
+The solution procedure mirrors this structure: relay-required points are
+clustered into service intervals by greater-than-$400$\,s gaps; candidate hover
+points are generated on the $0.01^\circ$ DEM grid within $300$\,m above ground
+and $12$\,km of the depot, keeping only points from which every relay-required
+point of a segment passes the link budget; a greedy pass selects the fewest
+candidates per interval, splitting at the median time when a segment remains
+uncovered, and the resulting adjacent segments are packed into sorties under the
+component-inventory and return-SOC constraints with earliest-available assignment
+of the two airframes.
 
 \textbf{Proposition 1 (mode dominance).} Let $\mathcal{S}_{\mathrm{SH}}$ be
 the set of coverage plans feasible when every sortie is restricted to a single
@@ -567,12 +569,24 @@ cannot raise the optimum.\hfill $\square$
 \noindent
 \emph{Empirical gap.} The proposition is a feasibility statement; how much the
 enlarged feasible set buys on the test instance is measured empirically. The
-single-hover mode covers only $51.0\%$, $62.7\%$ and $82.1\%$ of the
+tested single-hover heuristics attain only $51.0\%$, $62.7\%$ and $82.1\%$ of the
 relay-required points with one, two and three airframes, so the single-hover
-mode does not attain full coverage for $N\le3$; under MHPRS the same two
+mode did not reach full coverage for $N\le3$ in these tests; under MHPRS the two
 available airframes chain several hover points per sortie and the verified plan
-covers all 11683 sampled relay-required points with only four sorties, showing
-where the practical gap comes from.
+covers all 11,713 sampled relay-required points with four sorties, showing where
+the practical gap comes from.
+
+\textbf{Proposition 2 (relay concurrency lower bound on the test instance).}
+Any feasible MHPRS plan for the test instance requires at least two relay
+airframes to be active simultaneously. \emph{Proof.} Two first-segment service
+windows overlap, $[751.8,1512.6]$\,s and $[752.8,1712.7]$\,s, sharing $759.8$\,s
+of time, while their point-cloud centroids lie $7188.5$\,m apart. Let $U$ be the
+union of their relay-required points ($3765$ points). Enumerating all $397$
+candidate hover points, none covers $U$ (the best single point covers $2567$).
+Since the two windows are active during their overlap, one airframe would have
+to occupy a single hover point covering both segments at once, which does not
+exist; hence at least two relay airframes must be active simultaneously.\hfill
+$\square$
 
 The combined stage-3 objective is
 \begin{align}
@@ -583,13 +597,17 @@ E_{\mathrm{relay}} &= \sum_{c}\!\Big(E^{\mathrm{fly}}_{c}
 \end{align}
 where $w_c$ is the accumulated hovering wait time within sortie $c$ and
 $E^{\mathrm{fly}}_{c}$ is the outbound/transfer/return flight energy, subject to
-the constraint set listed in the MHPRS definition above. The resulting
+the constraint set listed in the MHPRS definition above. The stage-3 solver is a
+greedy construction over the candidate hover points, so the returned schedule
+satisfies the constraints above but minimizes neither the relay energy nor the
+sortie count in a proven sense; Proposition~2 certifies only the two-airframe
+lower bound. The resulting
 multi-hover-point direct-transfer mode, together with its coverage advantage
 over the single-hover baseline, is illustrated in Fig.~\ref{fig:mhprs} and
 summarized in Algorithm~\ref{alg:q3}.
 
 \begin{algorithm}[t]
-\caption{Task-driven relay assignment (TD-CJO)}
+\caption{Task-driven multi-hover-point relay assignment (MHPRS)}
 \label{alg:q3}
 \begin{algorithmic}[1]
 \STATE \textbf{input} Problem-2 schedule, DEM, link params, 2 relay UAVs, 6 components
@@ -600,13 +618,13 @@ summarized in Algorithm~\ref{alg:q3}.
 \STATE pack adjacent segments into sorties (multi-hover direct transfer); earliest-available assignment
 \STATE check component turnover (two-stage charging) and return SOC
 \STATE full verification by per-second sampling and boundary checks
-\STATE \textbf{output} 2-UAV / 4-sortie main plan (11683 sampled relay points, 100\% covered)
+\STATE \textbf{output} 2-UAV / 4-sortie main plan (11,713 sampled relay points, 100\% on the 1-s grid)
 \end{algorithmic}
 \end{algorithm}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.9\linewidth]{fig_mhprs.pdf}
+\includegraphics[width=0.70\linewidth]{fig_mhprs.pdf}
 \caption{Multi-hover-point direct-transfer relay scheduling mode.
 (a) Hover-point chains of the two relay sorties, where the direct transfer
 between hover points is the decisive factor; (b) coverage of relay-required
@@ -653,27 +671,23 @@ area, consistent with the heavy load carried by the larger group.
 % ---------------------------------------------------------------------
 \subsection{Setup}
 All results are computed on the standard mountainous test instance supplied with
-the problem: one dispatch center $O_{01}$ (with gateway G01), 15 service areas
-$S_1$--$S_{15}$, 80 indivisible boxes of four supply categories, three transport
-UAV types with a shared battery pool, two relay UAVs with six energy components,
-a 30\,m DEM and the specified wireless-link parameters. For the batching stage
-the exact set-partitioning solver is compared with the greedy FFD and BFD
-heuristics over $N{=}30$ randomized instances derived from the real case; for the routing and relay stages the
-multi-hover-point plan is compared with single-area, single-hover-point and
-augmented-fleet controls. Metrics are the number of trips, total energy,
-makespan, soft delay and communication coverage; all solvers use Python
-(NumPy/pandas) and the reported values are reproduced by an independent
+the problem: one dispatch center $O_{01}$ (gateway G01), 15 service areas, 80
+indivisible boxes of four categories, three transport UAV types with a shared
+battery pool, two relay UAVs with six energy components, a 30\,m DEM and the
+specified link parameters. The exact batching solver is compared with greedy FFD
+and BFD over $N{=}30$ randomized instances derived from the real case, and the
+relay plan with single-area, single-hover-point and augmented-fleet controls.
+Metrics are trips, total energy, makespan, soft delay and coverage; all solvers
+use Python (NumPy/pandas) and the values are reproduced by an independent
 verification script. Relay-required points are counted on per-second sampled
-trajectories (1\,s step), and the coverage figures quoted here for the main plan
-refer to this caliber, whereas the threshold and clearance scans reported below
-resample the same trajectories at a coarser 5\,s search step, which is why their
-relay-required counts are smaller. The fleet and energy parameters are listed in
-Table~\ref{tab:platform} and the communication and terrain parameters in
-Table~\ref{tab:link}; the return-SOC floor is $\rho=20\%$ and the climb energy
-efficiency is $0.72$. The 80 boxes span four categories: medical kits
-($3$\,kg, $0.012$\,m$^3$), drinking water ($14$\,kg, $0.027$\,m$^3$),
-emergency food ($8$\,kg, $0.028$\,m$^3$) and hygiene items ($6$\,kg,
-$0.035$\,m$^3$).
+trajectories (1\,s step), to which the main-plan coverage figures refer, whereas
+the threshold and clearance scans resample the same trajectories at a coarser
+5\,s search step and therefore report fewer points. Table~\ref{tab:platform}
+lists the fleet and energy parameters and Table~\ref{tab:link} the communication
+and terrain parameters; the return-SOC floor is $\rho=20\%$ and the climb
+efficiency is $0.72$. The four box categories are medical kits ($3$\,kg,
+$0.012$\,m$^3$), drinking water ($14$\,kg, $0.027$\,m$^3$), emergency food
+($8$\,kg, $0.028$\,m$^3$) and hygiene items ($6$\,kg, $0.035$\,m$^3$).
 
 \begin{table}[t]
 \centering
@@ -728,22 +742,20 @@ Gateway G01 (20\,m mast) & 27\,dBm / 12\,dBi \\
 
 \subsection{Baseline Comparison}
 Table~\ref{tab:q1_baseline} compares the exact dynamic-programming batching with
-the classical FFD, BFD and WFD heuristics over $N{=}30$ randomized instances
-derived from the real case. On average the proposed method returns the fewest
-trips and the lowest energy (67.18\,kWh), and the $2.49\%$ mean energy penalty of
-the heuristics is statistically significant ($p<10^{-4}$, two-sided Wilcoxon
-signed-rank test). On the real instance the same ordering holds with a much
-smaller gap (59.24\,kWh against 59.65\,kWh, i.e.\ $0.69\%$): the advantage of the
-exact solver lies in consistent behaviour across instances rather than in a
-single large energy margin. The randomized instances are generated with the
-fixed seed 20251015: the box count is drawn uniformly from
+the classical FFD, BFD and WFD heuristics over $N{=}30$ randomized instances. On
+average the proposed method returns the fewest trips and the lowest energy
+(67.18\,kWh), and the $2.49\%$ mean energy penalty of the heuristics is
+significant ($p<10^{-4}$, two-sided Wilcoxon signed-rank test). On the real
+instance the same ordering holds with a much smaller gap (59.24\,kWh against
+59.65\,kWh, i.e.\ $0.69\%$), so the exact solver's advantage lies in consistent
+behaviour across instances rather than in a single large energy margin. The
+instances use the fixed seed 20251015: the box count is uniform on
 $\{40,\dots,120\}$, the service-area coordinates are jittered with
-$\sigma=0.0005^\circ$, and the box categories are resampled from the empirical
-distribution of the real case. The Wilcoxon statistic uses the 29 non-zero
-per-instance pairs, giving an exact two-sided $p=2.56\times10^{-6}$ for both
-FFD and BFD. Across the family the per-instance energy spans $42.6$--$89.3$\,kWh
-and the trip count $14$--$22$, so the comparison covers instances both smaller
-and larger than the real case rather than a narrow neighborhood of it.
+$\sigma=0.0005^\circ$, and the categories are resampled from the real case. The
+Wilcoxon statistic uses the 29 non-zero pairs, giving an exact two-sided
+$p=2.56\times10^{-6}$ for FFD and BFD, and the per-instance energy spans
+$42.6$--$89.3$\,kWh with $14$--$22$ trips, so the comparison covers instances
+both smaller and larger than the real case.
 
 \begin{table}[t]
 \centering
@@ -768,18 +780,16 @@ The models are examined by ablation and one-factor sensitivity analysis.
 
 For the routing stage, the candidate search evaluates 57 plans, of which five
 are non-dominated (Table~\ref{tab:pareto}). The recommended 20-trip main plan
-has the lowest makespan ($2.72$\,h) and near-minimal energy ($65.25$\,kWh);
-its soft delay of $137.6$\,min concerns only soft-deadline boxes, because all
-31 hard-deadline boxes are delivered on time. Decomposed by aircraft type, the
-main plan flies four A-type trips ($9.59$\,kWh), seven B-type trips
-($16.32$\,kWh) and nine C-type trips ($39.34$\,kWh), so the heavy C type
-carries $60.3\%$ of the transport energy. All eight airframes are used: the
-four A airframes fly one trip each, while the two B and two C airframes fly up
-to four and five trips respectively under battery-turnover constraints.
-Nineteen trips serve a single service area and only one trip (T18) chains two
-areas (S011 then S008), which shows that cross-area chaining is profitable only
-where the inherited Problem-1 batches leave small residual loads. The makespan
-is set by the last C-type trip to S007, which returns at $9794$\,s.
+has the lowest makespan ($2.72$\,h) and near-minimal energy ($65.25$\,kWh); its
+soft delay of $137.6$\,min concerns only soft-deadline boxes, because all 31
+hard-deadline boxes are on time. By aircraft type it flies four A trips
+($9.59$\,kWh), seven B trips ($16.32$\,kWh) and nine C trips ($39.34$\,kWh), the C
+type carrying $60.3\%$ of the transport energy; all eight airframes are used, the
+four A airframes flying one trip each and the two B and two C airframes up to
+four and five. Nineteen trips serve one area and only T18 chains two (S011 then
+S008), so cross-area chaining pays off only where the inherited batches leave
+small residual loads. The makespan is set by the last C trip to S007, returning
+at $9794$\,s.
 
 To measure the optimality gap of the scheduling layer independently of the
 candidate-structure search, the urgency-first scheduler and an exact CP-SAT
@@ -801,6 +811,15 @@ $2.07{\pm}0.28$\,h (median gain $15.2\%$, Wilcoxon $p{<}10^{-8}$), at $5.0$\,s
 mean wall time, proving optimality on 28/30 within 30\,s. CP-SAT solves only
 the scheduling sub-problem: it receives batched trips and precomputed physical
 options, leaving DEM feasibility and batching-structure enumeration to our chain.
+
+The CP-SAT schedule, computed on the same 20-trip task set, is strictly better
+on makespan, energy and soft delay ($2.11$\,h, $64.31$\,kWh and $5.3$\,min
+against $2.72$\,h, $65.25$\,kWh and $137.6$\,min for the urgency-first plan),
+but it is not adopted as the recommended transport plan: only the urgency-first
+plan has had its full relay demand identified and verified point-by-point, and
+the relay schedule is conditional on the transport timeline, which the CP-SAT
+schedule changes. The relay results below therefore apply to the urgency-first
+plan only, and the recommendation is scoped accordingly.
 
 \begin{table}[t]
 \centering
@@ -842,17 +861,14 @@ Trips & Energy (kWh) & Makespan (h) & Soft delay (min) \\
 \end{table}
 
 For the batching model, forcing a single aircraft type raises the energy to
-112.39\,kWh (all~A), 68.48\,kWh (all~B) or 74.06\,kWh (all~C), against
-59.24\,kWh for the mixed exact plan, so the aircraft--payload--range match is
-the dominant factor. In the exact plan twelve areas are served by a single
-trip and three areas need two (S001--S003); the binding energy constraint is
-the C-type trip to S004, which returns with SOC $0.228$, only $2.8$ percentage
-points above the margin floor, while the DEM-driven cruise altitudes of the 18
-trips range from $273$\,m (S001) to $592$\,m (S014).
-Table~\ref{tab:margin} scans the return-safety margin: the
-18-trip, 59.24\,kWh plan is unchanged for $\rho\le20\%$, and feasibility breaks
-at $\rho{=}40\%$, where the empty round trips to S004 and S008 exceed the
-equivalent range.
+112.39\,kWh (all~A), 68.48\,kWh (all~B) or 74.06\,kWh (all~C) against
+59.24\,kWh for the mixed plan, so the aircraft--payload--range match dominates.
+In the exact plan twelve areas need one trip and three need two (S001--S003);
+the binding constraint is the C trip to S004, returning at SOC $0.228$, and the
+cruise altitudes of the 18 trips span $273$--$592$\,m. Table~\ref{tab:margin}
+scans the return margin: the 18-trip plan is unchanged for $\rho\le20\%$ and
+becomes infeasible at $\rho{=}40\%$, where the empty round trips to S004 and
+S008 exceed the equivalent range.
 
 \begin{table}[t]
 \centering
@@ -877,51 +893,54 @@ For the relay stage, Table~\ref{tab:threshold} tightens the receiving
 threshold: from $-98$ to $-95$ to $-90$\,dBm the relay-required points grow
 from 0 to 806 to 2311 and the directly served areas shrink from 15 to 10 to 3.
 Under the single-hover-point round-trip baseline only 51.0\%, 62.7\% and
-82.1\% of these points are covered by one, two and three airframes, confirming
-that the transfer between hover points is essential. Raising the safety
+82.1\% of these points are covered by one, two and three airframes, so the
+tested single-hover heuristics fall short of full coverage. Raising the safety
 clearance above the terrain-following cruise altitude from 0 to 25 to 50\,m
 increases the direct-connection rate only moderately, from 61.7\% to 63.2\% to
 64.7\%, so the relay requirement is governed mainly by the receiving threshold
-rather than by the clearance margin. The independently rebuilt four-sortie plan
-assigns 5137, 508, 1558 and 4480 relay-required points to the four sorties,
-with a rebuilt relay energy of $5.52$\,kWh against the frozen $5.43$\,kWh (a
-$1.6\%$ deviation), and the weakest verified link measures $-89.66$\,dBm,
-only $0.34$\,dB above the $-90$\,dBm threshold. Table~\ref{tab:sortie} breaks the
+rather than by the clearance margin. The rebuilt four-sortie plan
+assigns 5,340, 508, 1,383 and 4,482 relay-required points to the four sorties,
+with a rebuilt relay energy of $5.50$\,kWh against the frozen $5.43$\,kWh (a
+$1.17\%$ deviation), and the weakest verified link measures $-89.78$\,dBm,
+only $0.22$\,dB above the $-90$\,dBm threshold. Table~\ref{tab:sortie} breaks the
 verification down per sortie: the two multi-hover sorties (R01M1 with three
-hover points, R02M2 with two) carry $82.3\%$ of the relay-required points and
-show the largest, still small, rebuild deviations, because their inter-hover
-transfer segments had to be reconstructed independently --- the frozen schedule
-registers only one hover coordinate per sortie --- whereas the single-hover
+hover points, R02M2 with two) carry $83.9\%$ of the relay-required points and
+show the largest, still small, rebuild deviations, because two of their
+inter-hover transfer points are absent from the frozen log and had to be
+re-searched independently, whereas the single-hover
 sorties match the frozen energy within $0.2\%$--$2.4\%$. The reconstruction
-rule behind these rebuilt values is conservative: the frozen point log contains
-11683 rows with 68 boundary duplicates (11615 unique sortie--time pairs), and
+rule is conservative: the canonical demand set contains $11{,}713$ logged
+one-second rows with $68$ boundary duplicates ($11{,}645$ unique
+sortie--time pairs), and
 the two missing transfer hover points were re-searched on the $0.01^\circ$ DEM
 grid within $300$\,m above ground and $12$\,km of the depot, taking among all
 candidates that cover the whole segment the one nearest to the segment's
-point-cloud centroid. Neither hover geometry nor relay energy was reverse-
-engineered from the frozen plan; only the transfer-climb efficiency was
-calibrated ($\eta_c\approx0.50$ vs.\ the design value $0.72$), so the frozen plan
-is unaffected.
+point-cloud centroid. Because two hover points are reconstructed from the DEM
+grid rather than read from the frozen log, this recomputation is a reconstruction
+check of the frozen plan rather than a fully independent measurement; it uses the
+design parameters unchanged, including the transfer-climb efficiency
+$\eta_c=0.72$ (no parameter is fitted to the frozen results), and leaves the
+frozen plan itself unaffected.
 
 \begin{table}[t]
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \caption{Per-sortie verification of the four-sortie relay plan. Points are logged
-one-second samples (11615 unique after deduplication); energy is the rebuilt value
-against the frozen log (kWh); SOC is the rebuilt return state of charge; R01 flies
-M1--M2, R02 flies M1--M2.}
+one-second samples (11,645 unique after removing 68 boundary duplicates); energy
+is the rebuilt value against the frozen log (kWh); SOC is the rebuilt return
+state of charge; R01 flies M1--M2, R02 flies M1--M2.}
 \label{tab:sortie}
 \begin{tabular}{llcccc}
 \toprule
 Sortie & Hover-point chain & Points & Energy (kWh) & SOC \\
 \midrule
-R01M1 & PER1\_E$\to$PER2$\to$PER3\_NE & 5137 & 1.844 / 1.823 & 0.424 \\
-R01M2 & single hover point & 508 & 1.081 / 1.056 & 0.662 \\
-R02M1 & single hover point & 1558 & 0.703 / 0.701 & 0.781 \\
-R02M2 & PER3\_SW$\to$PER4 & 4480 & 1.892 / 1.853 & 0.409 \\
+R01M1 & PER1\_E$\to$PER2$\to$PER3\_NE & 5340 & 1.939 / 1.823 & 0.394 \\
+R01M2 & single hover point & 508 & 1.059 / 1.056 & 0.669 \\
+R02M1 & single hover point & 1383 & 0.678 / 0.701 & 0.788 \\
+R02M2 & PER3\_SW$\to$PER4 & 4482 & 1.820 / 1.853 & 0.431 \\
 \midrule
-Total & 7 hover points, 7 service windows & 11683 & 5.519 / 5.433 & -- \\
+Total & 7 hover points, 7 service windows & 11713 & 5.497 / 5.433 & -- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -974,16 +993,23 @@ clustering: $K$-means ($100$ restarts) and Ward agglomerative clustering on
 standardized coordinates (geo) and on coordinates plus
 boxes--mass--volume--first-batch demand (geo+demand). Each clustering output
 receives the identical S008--S011 feasibility repair (shared sortie T18) and
-is scored by the identical peak-concurrency accounting. Among operationally
-valid partitions (every group $\ge$3 areas), Table~\ref{tab:benchq4} shows
-SC-MAE-RG attains the smallest scale and gap for both $K$: $31/5$ for $K{=}2$
-against $36/9$ and $37/9$, and $38/10$ for $K{=}3$ against $43/15$ and
-$40/12$. Clustering obtains smaller (better) $J$ but at the price of more
-cross-group relay sorties and replicas. With demand features, both methods
-isolate S001 (154\,kg, $1.9\times$ the next-largest area) into a
+is scored by the identical peak-concurrency accounting; no method is re-solved
+under an extra minimum-group-size rule, so the comparison is like-for-like.
+Table~\ref{tab:benchq4} reports all partitions. For $K{=}2$,
+SC-MAE-RG attains the smallest scale and gap ($31/5$) among the partitions that
+respect the shared-sortie constraint, against $36/9$ and $37/9$ for the geo
+clusterings, and $38/10$ for $K{=}3$ against $43/15$ and $40/12$. The geo
+clusterings obtain a smaller (better) balance index $J$ but at the price of more
+cross-group relay sorties and replicas, so the comparison is a trade-off among
+resource scale, inventory gap and cross-group relay redundancy rather than a
+strict dominance. The demand-feature variants attain an apparently lower $D/G$
+($29/4$ for $K{=}2$) because they isolate
+S001 (154\,kg, $1.9\times$ the next-largest area) into a
 singleton group ($1{+}14$ for $K{=}2$; $1{+}7{+}7$ and $1{+}5{+}9$ for
-$K{=}3$), violating the support-unit rule, so their apparently lower $D/G$
-is inoperable: generic clustering minimizes feature dispersion without
+$K{=}3$); since S001 shares transport sortie T18 with S008, which the model
+places in the same group, these outputs violate the shared-sortie constraint and
+are reported for completeness rather than adopted. Generic clustering thus
+minimizes feature dispersion without
 perceiving peak concurrency or the non-splittable shared-sortie coupling.
 
 \begin{table}[t]
@@ -1011,9 +1037,10 @@ geo+demand clustering$^{\dagger}$ & 3 & 36--39 & 9--11 & 0.54--0.67 & 2--3 \\
 \end{tabular}
 
 \vspace{2pt}
-{\footnotesize $^{\dagger}$Both $K$-means and Ward isolate S001 into a
-singleton group ($1{+}14$; $1{+}7{+}7$ / $1{+}5{+}9$) and are therefore not
-operationally valid despite the low gap.}
+{\footnotesize $^{\dagger}$The demand-feature clusterings isolate S001 into a
+singleton group ($1{+}14$; $1{+}7{+}7$ / $1{+}5{+}9$), which violates the
+shared-sortie constraint because S001 shares T18 with S008; the low gap is
+therefore not realizable.}
 \end{table}
 
 \begin{table}[t]
@@ -1064,32 +1091,31 @@ S006 & 59 & 0.156 & 3181 & 0.268 & 5 \\
 \subsection{Discussion}
 The partitioning stage converts the coupled schedule into an actionable
 decision: the recommended $K{=}2$ plan has a quantified gap of five resource
-units (two B-type airframes, two B-type batteries and one relay airframe), so the
-augmentation list is explicit rather than qualitative.
-
-From a deployment perspective the outputs map directly onto field operations:
-per-trip loading and route sheets executable without re-running any
-optimization, four independently executable relay sorties spanning seven service
-windows and verified point-by-point at one-second resolution, DEM-derived cruise
-altitudes that keep the prescribed clearance, and a procurement list naming the
-five missing units of the $K{=}2$ plan by type, where the zero-replication
+units (two B-type airframes, two B-type batteries and one relay airframe). From a
+deployment perspective the outputs map onto field operations: per-trip loading
+and route sheets executable without re-optimization, four relay sorties spanning
+seven service windows and verified point-by-point at one-second resolution,
+DEM-derived cruise altitudes that keep the prescribed clearance, and a
+procurement list naming the five missing units by type, where the zero-replication
 control shows cross-group relay sharing, not vehicle count, to be binding.
 
 Two threats to validity deserve emphasis. First, the energy model is validated
-only against frozen computational artifacts: the independent recomputation
-reproduces the relay-point count within 0.3\% and the relay energy within
-1.6\%, but no hardware flight test has been performed, and wind, payload-drag
+only against frozen computational artifacts: the reconstruction reproduces the
+relay-required count within 0.3\% and the relay energy within 1.2\%, but two of
+the seven hover points are re-derived from the DEM grid rather than read from the
+frozen log, so this is a reconstruction check rather than an independent flight
+measurement, and no hardware flight test has been performed; wind, payload-drag
 and battery-aging effects could shift the absolute figures. Second, relay
-demand is identified on a five-second search grid over the link budget, which
-underestimates the relay-required population relative to the one-second
-verification grid; the 11683-sample coverage claim therefore holds for the
-verified solution, while the candidate-hover search may miss short-duration
+demand is identified on a five-second search grid, which underestimates the
+relay-required population relative to the one-second verification grid; the
+11,713-sample coverage claim therefore holds only on the one-second grid under
+the stated link model, and the candidate search may miss short-duration
 blockage events. Further limitations are that link feasibility is judged by a
-binary DEM line-of-sight test with a fixed occlusion loss, that the environment
-is deterministic and does not model weather or equipment faults. For Problem
-2, optimality is certified for the scheduling sub-problem only on a fixed
-trip set, where the exact CP-SAT benchmark quantifies the greedy scheduler gap
-at about $15\%$ in makespan; the joint batching--routing--scheduling optimum is
+binary DEM line-of-sight test with a fixed occlusion loss, and that the
+environment is deterministic and does not model weather or equipment faults. For
+Problem 2, optimality is certified only for the scheduling sub-problem on a fixed
+trip set, where CP-SAT quantifies the greedy gap at about $15\%$ in makespan; the
+joint batching--routing--scheduling optimum is
 not searched, so the $65.25$\,kWh main plan remains the best of the enumerated
 candidate structures rather than a proven joint optimum. Because the parameters
 are data-driven, the model chain can be transferred to other mountainous
@@ -1097,34 +1123,31 @@ disaster settings, but the reported fleet configuration and coverage figures
 are instance-specific.
 
 Transferring the chain to a new site requires re-running, not re-designing:
-(i)~recompute the machine--area safe-payload table from a DEM of the region;
-(ii)~survey the available fleet, batteries and relay components into the
-parameter tables; (iii)~adopt the link parameters and re-identify the
-relay-required population from the planned trajectories; and (iv)~run the four
-stages in order, since each consumes only its predecessors' outputs. Only the
-Problem-2 tour enumeration and the Problem-3 per-second verification grow
-noticeably with instance size, and both are embarrassingly parallel.
+recompute the machine--area safe-payload table from a regional DEM, survey the
+available fleet, batteries and relay components into the parameter tables,
+re-identify the relay-required population from the planned trajectories, and run
+the four stages in order. Only the Problem-2 tour enumeration and the Problem-3
+per-second verification grow noticeably with instance size, and both are
+embarrassingly parallel.
 
 % =====================================================================
 \section{Conclusion}
 % ---------------------------------------------------------------------
 This paper built a four-stage ``transport scheduling--communication
-support--resource allocation'' framework that runs on a single physical caliber,
-from DEM-driven batching to partition-based resource accounting; its core stage
-minimizes the relay resources that keep the delivery UAVs connected once their
-delivery plan is fixed. The exact
-batching model returns an 18-trip plan at 59.24\,kWh together with a verified
-optimality benchmark; the heterogeneous routing model delivers all 80 boxes,
-satisfies all 31 hard deadlines and recommends a 20-trip main plan at
-65.25\,kWh; and the joint transport--communication stage covers all 11683
-sampled relay-required points with two relay airframes and four sorties at a
-joint energy of 70.68\,kWh. The partitioning stage then quantifies the resource gap and
-produces an explicit augmentation list. The sensitivity studies delineate the
-operating envelope of these plans: the batching solution tolerates return
-margins up to $35\%$ before losing feasibility at $40\%$, the relay demand is
-governed by the receiving threshold rather than by the terrain-clearance
-margin, and the multi-hover mode is the only tested configuration that reaches
-full coverage with the available two relay airframes.
+support--resource allocation'' framework that runs on one consistent physical
+model; its core stage constructs, once the delivery plan is fixed, a relay
+schedule that satisfies coverage, energy and resource constraints. The exact
+batching model returns an 18-trip plan at 59.24\,kWh with a verified optimality
+benchmark; the heterogeneous routing model delivers all 80 boxes, satisfies all
+31 hard deadlines and recommends a 20-trip plan at 65.25\,kWh; and the relay
+stage covers all 11,713 sampled relay-required points with two airframes and four
+sorties at 5.50\,kWh (joint 70.75\,kWh). The partitioning stage then quantifies
+the resource gap and produces an explicit augmentation list. The sensitivity
+studies delineate the operating envelope: the batching solution tolerates return
+margins up to $35\%$ before failing at $40\%$, the relay demand is governed by the
+receiving threshold rather than the terrain clearance, and among the tested
+configurations only the multi-hover mode reaches full coverage on the one-second
+grid with the available two relay airframes.
 
 Four directions merit further work. (i)~The one-second discrete verification
 should be replaced by event-driven continuous-time link checking, so that
@@ -1159,6 +1182,8 @@ verification pipeline:
 
 % =====================================================================
 \begin{thebibliography}{99}
+\footnotesize
+\setlength{\itemsep}{0pt plus 0.3pt}\setlength{\parsep}{0pt}
 % NOTE: identifiers below were verified against Crossref / publisher pages /
 %       CNKI-CQVIP records (2026-10-15). Obscure Chinese theses and trade-press
 %       items carry no DOI in IEEE style; [in Chinese] marks the language.

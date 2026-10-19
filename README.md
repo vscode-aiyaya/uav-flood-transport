@@ -1,9 +1,9 @@
-# Coupled UAV Transportation–Communication Scheduling in Mountain Flood Disaster Relief
+# Multi-Hover-Point Relay Scheduling for UAV Emergency Delivery under a Fixed Transport Plan
 
 Reproducibility repository accompanying the manuscript:
 
-> **A Unified Multi-Model Framework for Coupled UAV Transportation and
-> Communication Scheduling in Mountain Flood Disaster Relief**
+> **Multi-Hover-Point Relay Scheduling for UAV Emergency Delivery under a
+> Fixed Transport Plan**
 > Yang Xin, Zhao Zidong, Song Yuwei.
 > *Manuscript, 2026* (preprint/journal reference to be added).
 
@@ -101,8 +101,9 @@ cd ../../figures && python make_figs.py
 | P2 recommended plan | 20 trips, 65.25 kWh, makespan 2.72 h, 31/31 hard deadlines met |
 | CP-SAT vs greedy (fixed 20 trips) | 2.11 h vs 2.46 h makespan; 64.31 vs 67.38 kWh; proven optimal in 0.53 s |
 | CP-SAT family (30 instances) | 2.07±0.28 vs 2.47±0.33 h, win/tie/loss 30/0/0, Wilcoxon p < 1e-8 |
-| P3 MHPRS coverage | all 11 683 sampled relay points (11 615 unique) on the 1 s grid, 4 sorties, 2 relay UAVs |
-| Joint transport + relay energy | 70.68 kWh |
+| P3 MHPRS coverage | all 11 713 sampled relay points (11 645 unique after removing 68 boundary duplicates) on the 1 s grid, 4 sorties, 2 relay UAVs |
+| P3 MHPRS relay energy | 5.50 kWh (rebuilt from the frozen log: 5.433 kWh, within 1.2 %) |
+| Joint transport + relay energy | 70.75 kWh |
 | P4 recommended K = 2 partition | D = 31, G = 5, J = 0.613 (best valid partition vs all clustering baselines) |
 
 Key deterministic settings:
