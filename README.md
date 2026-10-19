@@ -30,6 +30,17 @@ shipped data; nothing is hard-coded from the contest solution.
 │   ├── Q3_TD-CJO_v2.py          # P3 MHPRS plan construction
 │   ├── Q3_复核.py               # P3 independent 1 s point-by-point verification
 │   ├── Q3_绘图_v2.py
+│   ├── q3_rebuild/              # P3 independent first-principles rebuild (canonical set)
+│   │   ├── 01_轨迹与需中继点.py    # trajectory + relay-required points (11 713)
+│   │   ├── 02_冻结方案独立核验.py  # frozen plan + missing hover-point reconstruction
+│   │   ├── 03_能耗与SOC重算.py
+│   │   ├── 04_单悬停基线.py
+│   │   ├── 05_门限敏感性.py
+│   │   ├── 06_规范集合核验.py      # coverage on the canonical 11 713-point set
+│   │   ├── 07_能耗SOC_核验方案.py  # energy/SOC under the prior eta_c = 0.72
+│   │   ├── 08_固定方案可行性核验.py
+│   │   ├── 09_下界_中继机数.py     # >= 2 relay-airframe lower bound (Proposition 2)
+│   │   └── outputs/             # canonical verification artifacts
 │   ├── Q4_分区核算_v3.py        # P4 SC-MAE-RG resource accounting
 │   ├── Q4_TOPSIS.py / Q4_绘图_v3.py
 │   ├── *.csv / *.json           # frozen plans, logs and audit artifacts
@@ -79,6 +90,17 @@ python Q2_约束校验.py
 python Q3_TD-CJO_v2.py
 python Q3_复核.py
 
+# Problem-3 independent first-principles rebuild (see analysis/q3_rebuild/)
+python q3_rebuild/01_轨迹与需中继点.py      # trajectory + relay-required points
+python q3_rebuild/02_冻结方案独立核验.py    # frozen-plan point check + missing hover points
+python q3_rebuild/03_能耗与SOC重算.py       # energy/SOC ledger (eta_c via ETA_CLIMB)
+python q3_rebuild/04_单悬停基线.py          # single-hover baseline (51.0 / 62.7 / 82.1 %)
+python q3_rebuild/05_门限敏感性.py          # threshold sensitivity (2311 / 806 / 0)
+python q3_rebuild/06_规范集合核验.py        # coverage on the canonical point set
+python q3_rebuild/07_能耗SOC_核验方案.py    # energy/SOC under eta_c = 0.72
+python q3_rebuild/08_固定方案可行性核验.py  # read-only feasibility of the fixed plan
+python q3_rebuild/09_下界_中继机数.py       # >= 2 relay-airframe lower bound
+
 # Stage 4 — resource partitioning
 python Q4_分区核算_v3.py
 python Q4_TOPSIS.py
@@ -103,8 +125,24 @@ cd ../../figures && python make_figs.py
 | CP-SAT family (30 instances) | 2.07±0.28 vs 2.47±0.33 h, win/tie/loss 30/0/0, Wilcoxon p < 1e-8 |
 | P3 MHPRS coverage | all 11 713 sampled relay points (11 645 unique after removing 68 boundary duplicates) on the 1 s grid, 4 sorties, 2 relay UAVs |
 | P3 MHPRS relay energy | 5.50 kWh (rebuilt from the frozen log: 5.433 kWh, within 1.2 %) |
+| P3 relay-concurrency lower bound | >= 2 relay airframes (Proposition 2) |
+| P3 threshold sensitivity (-90 / -95 / -98 dBm) | relay-required points 2311 / 806 / 0; directly served areas 3 / 10 / 15 |
+| P3 weakest relay link | -89.78 dBm (TR<->relay), 0.22 dB above the -90 dBm threshold |
 | Joint transport + relay energy | 70.75 kWh |
 | P4 recommended K = 2 partition | D = 31, G = 5, J = 0.613 (best valid partition vs all clustering baselines) |
+
+### Problem-3 independent verification
+
+`analysis/q3_rebuild/` rebuilds every Problem-3 claim from the raw DEM and the
+frozen plan alone: per-second trajectories, the relay-required point set, the
+point-by-point coverage verdicts, the energy/SOC ledger and the relay-concurrency
+lower bound. The canonical set is **11 713 relay-required points on the 1 s grid
+(11 645 unique after removing 68 boundary duplicates)**; a 30-point residual
+(0.26 %) separates it from the earlier 11 683-point log, all on line-of-sight
+margins within ~1 dB of the -90 dBm threshold. The transfer-climb efficiency is
+the **prior model value eta_c = 0.72** (overridable via `ETA_CLIMB`) — no parameter
+is fitted to the frozen results — under which the rebuilt relay energy is
+5.497 kWh against the frozen 5.433 kWh (+1.17 %).
 
 Key deterministic settings:
 
