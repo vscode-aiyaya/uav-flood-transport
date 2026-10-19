@@ -11,7 +11,7 @@ The repository contains the full four-stage model chain — exact energy-aware
 bin packing (Problem 1), heterogeneous routing with battery turnover
 (Problem 2), multi-hover-point relay scheduling / MHPRS (Problem 3), and
 partition-based resource accounting / SC-MAE-RG (Problem 4) — together with
-the external solver/clustering benchmarks added in the journal version.
+the clustering benchmark added in the journal version.
 
 All reported numbers are produced by the scripts in this repository from the
 shipped data; nothing is hard-coded from the contest solution.
@@ -33,20 +33,17 @@ shipped data; nothing is hard-coded from the contest solution.
 │   ├── q3_rebuild/              # P3 independent first-principles rebuild (canonical set)
 │   │   ├── 01_轨迹与需中继点.py    # trajectory + relay-required points (11 713)
 │   │   ├── 02_冻结方案独立核验.py  # frozen plan + missing hover-point reconstruction
-│   │   ├── 03_能耗与SOC重算.py
 │   │   ├── 04_单悬停基线.py
 │   │   ├── 05_门限敏感性.py
 │   │   ├── 06_规范集合核验.py      # coverage on the canonical 11 713-point set
 │   │   ├── 07_能耗SOC_核验方案.py  # energy/SOC under the prior eta_c = 0.72
 │   │   ├── 08_固定方案可行性核验.py
 │   │   ├── 09_下界_中继机数.py     # >= 2 relay-airframe lower bound (Proposition 2)
-│   │   └── outputs/             # canonical verification artifacts
+│   │   └── outputs/             # canonical artifacts of the single chain 01->02->06->07->08
 │   ├── Q4_分区核算_v3.py        # P4 SC-MAE-RG resource accounting
 │   ├── Q4_TOPSIS.py / Q4_绘图_v3.py
 │   ├── *.csv / *.json           # frozen plans, logs and audit artifacts
-│   └── baselines/               # external benchmarks (journal version)
-│       ├── q2_cpsat_baseline.py # OR-Tools CP-SAT vs greedy, real instance
-│       ├── q2_cpsat_family.py   # 30-instance robustness family + Wilcoxon test
+│   └── baselines/               # external benchmark (journal version)
 │       ├── q4_cluster_baseline.py  # K-means / Ward vs SC-MAE-RG
 │       └── *.json / *.csv       # benchmark outputs
 ├── figures/
@@ -67,8 +64,8 @@ shipped data; nothing is hard-coded from the contest solution.
 pip install -r requirements.txt
 ```
 
-Core packages: `numpy`, `pandas`, `scipy`, `scikit-learn`, `matplotlib`,
-`ortools` (CP-SAT). A LaTeX distribution with the `IEEEtran` class is needed
+Core packages: `numpy`, `pandas`, `scipy`, `scikit-learn`, `matplotlib`.
+A LaTeX distribution with the `IEEEtran` class is needed
 only to rebuild the manuscript PDF.
 
 ## Reproduction
@@ -93,7 +90,6 @@ python Q3_复核.py
 # Problem-3 independent first-principles rebuild (see analysis/q3_rebuild/)
 python q3_rebuild/01_轨迹与需中继点.py      # trajectory + relay-required points
 python q3_rebuild/02_冻结方案独立核验.py    # frozen-plan point check + missing hover points
-python q3_rebuild/03_能耗与SOC重算.py       # energy/SOC ledger (eta_c via ETA_CLIMB)
 python q3_rebuild/04_单悬停基线.py          # single-hover baseline (51.0 / 62.7 / 82.1 %)
 python q3_rebuild/05_门限敏感性.py          # threshold sensitivity (2311 / 806 / 0)
 python q3_rebuild/06_规范集合核验.py        # coverage on the canonical point set
@@ -105,10 +101,8 @@ python q3_rebuild/09_下界_中继机数.py       # >= 2 relay-airframe lower bo
 python Q4_分区核算_v3.py
 python Q4_TOPSIS.py
 
-# External benchmarks (journal version)
+# Clustering benchmark (journal version)
 cd baselines
-python q2_cpsat_baseline.py     # Table VI: CP-SAT vs greedy, <1 s solve
-python q2_cpsat_family.py       # 30 synthetic instances, <=30 s per instance
 python q4_cluster_baseline.py   # Table XI: K-means / Ward vs SC-MAE-RG
 
 # Figures
@@ -121,14 +115,12 @@ cd ../../figures && python make_figs.py
 |---|---|
 | P1 exact batching | 18 trips, 59.24 kWh (0.69 % below FFD/BFD) |
 | P2 recommended plan | 20 trips, 65.25 kWh, makespan 2.72 h, 31/31 hard deadlines met |
-| CP-SAT vs greedy (fixed 20 trips) | 2.11 h vs 2.46 h makespan; 64.31 vs 67.38 kWh; proven optimal in 0.53 s |
-| CP-SAT family (30 instances) | 2.07±0.28 vs 2.47±0.33 h, win/tie/loss 30/0/0, Wilcoxon p < 1e-8 |
 | P3 MHPRS coverage | all 11 713 sampled relay points (11 645 unique after removing 68 boundary duplicates) on the 1 s grid, 4 sorties, 2 relay UAVs |
-| P3 MHPRS relay energy | 5.50 kWh (rebuilt from the frozen log: 5.433 kWh, within 1.2 %) |
+| P3 MHPRS relay energy | 5.432 kWh rebuilt vs 5.433 kWh frozen (-0.02 %); 6 distinct hover points serving 7 service windows |
 | P3 relay-concurrency lower bound | >= 2 relay airframes (Proposition 2) |
 | P3 threshold sensitivity (-90 / -95 / -98 dBm) | relay-required points 2311 / 806 / 0; directly served areas 3 / 10 / 15 |
-| P3 weakest relay link | -89.78 dBm (TR<->relay), 0.22 dB above the -90 dBm threshold |
-| Joint transport + relay energy | 70.75 kWh |
+| P3 weakest relay link | -89.62 dBm (TR<->relay), 0.38 dB above the -90 dBm threshold |
+| Joint transport + relay energy | 70.68 kWh |
 | P4 recommended K = 2 partition | D = 31, G = 5, J = 0.613 (best valid partition vs all clustering baselines) |
 
 ### Problem-3 independent verification
@@ -142,22 +134,19 @@ lower bound. The canonical set is **11 713 relay-required points on the 1 s grid
 margins within ~1 dB of the -90 dBm threshold. The transfer-climb efficiency is
 the **prior model value eta_c = 0.72** (overridable via `ETA_CLIMB`) — no parameter
 is fitted to the frozen results — under which the rebuilt relay energy is
-5.497 kWh against the frozen 5.433 kWh (+1.17 %).
+5.432 kWh against the frozen 5.433 kWh (-0.02 %). The two hover points missing
+from the frozen log are reconstructed once in `02_冻结方案独立核验.py` under the
+paper's Sec. 5.3.2 rule (full coverage first, then nearest to the segment
+centroid); `06`/`07`/`08` all read that single hover-point chain, so coverage,
+energy and feasibility are verified on identical coordinates.
 
 Key deterministic settings:
 
 * Random seed `20251015` for the P1/P2 random-instance families and for
-  K-means; CP-SAT uses 8 workers and a 30 s (family) / 300 s (real instance
-  cap) time limit.
-* All CP-SAT durations are rounded **up** to whole seconds, so every
-  CP-feasible schedule is strictly feasible under the continuous physical
-  model; `q2_cpsat_baseline.py` additionally re-verifies the returned
-  schedule against the continuous energy/time model in Python
-  (`independent_verify.passed = true` in `q2_cpsat_real.json`).
-* Typical wall time on an 8-core desktop CPU: P1 < 1 s; P2 scheduling
-  benchmark 0.53 s (proven optimal); Q4 clustering < 1 s; the P2 structure
-  enumeration and P3 per-second verification are the longest stages
-  (single-digit minutes) and are embarrassingly parallel.
+  K-means.
+* Typical wall time on an 8-core desktop CPU: P1 < 1 s; Q4 clustering < 1 s;
+  the P2 structure enumeration and P3 per-second verification are the longest
+  stages (single-digit minutes) and are embarrassingly parallel.
 
 ## Data provenance
 

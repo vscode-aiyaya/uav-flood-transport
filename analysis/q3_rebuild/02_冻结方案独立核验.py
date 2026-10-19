@@ -12,8 +12,10 @@ Q3重建 脚本02：冻结《两架方案》的独立链路核验与缺失悬停
     R02M1 坐标覆盖其全部1558点
     R02M2 坐标覆盖时段1（2448点），时段2仅1578/2032
   即缺失2个转场悬停点（R01M1时段3、R02M2时段2），本脚本对其按论文5.3.2节
-  规则在0.01°DEM网格（离地300m、距O01<=12km）上独立重建（贪心覆盖最大点），
-  再做逐点双跳双向链路核验。重建点已在输出与报告中显式标注，不与冻结实测点混淆。
+  规则在0.01°DEM网格（离地300m、距O01<=12km）上独立重建，规则为：
+  在能全覆盖本段全部需求点的候选中取距本段点云质心最近者；若无全覆盖候选，
+  退取覆盖数最大者（同覆盖数取距质心最近者）。重建点已在输出与报告中显式标注，
+  不与冻结实测点混淆。脚本06/07/08 均只读本脚本输出的同一悬停链，不再各自选点。
 
 链路参数（论文式5.1、表C.2）：
   TR(20dBm,3dBi)<->REL_A(20dBm,6dBi) 双向弱向 26-PL
@@ -126,13 +128,20 @@ for mid, si, sg in segments:
         Cuse, src = Cf[0], '冻结排程表坐标'
         ok, pr1, pr2 = okf[:, 0], pr1f[:, 0], float(pr2f[0])
     else:
-        # 缺失悬停点：局部走廊内独立贪心重建
-        msk = ((cand[:, 0] >= sg['lon'].min()-0.08) & (cand[:, 0] <= sg['lon'].max()+0.08)
-               & (cand[:, 1] >= sg['lat'].min()-0.08) & (cand[:, 1] <= sg['lat'].max()+0.08))
-        Cl = cand[msk]
-        cok, cpr1, cpr2 = cover(P, Cl)
-        bi = int(np.argmax(cok.sum(axis=0)))
-        Cuse, src = Cl[bi], '独立重建（冻结文件缺失）'
+        # 缺失悬停点：全候选网格重建（与论文5.3.2规则一致，不设局部走廊）——
+        # 全覆盖本段的候选中取距本段点云质心最近者；无全覆盖候选时取覆盖数最大者。
+        cok, cpr1, cpr2 = cover(P, cand)
+        cov = cok.sum(axis=0)
+        pool = np.flatnonzero(cov == len(P))
+        if len(pool) == 0:
+            pool = np.flatnonzero(cov == cov.max())
+        cx, cy = float(sg['lon'].mean()), float(sg['lat'].mean())
+        dc = hav_m(radians(cx), radians(cy),
+                   np.radians(cand[pool, 0]), np.radians(cand[pool, 1]))
+        bi = int(pool[int(np.argmin(dc))])
+        Cl = cand  # 供下方 missing 记录列引用
+        cok_full, cpr1_full, cpr2_full = cok, cpr1, cpr2
+        Cuse, src = cand[bi], '独立重建（冻结文件缺失）'
         ok, pr1, pr2 = cok[:, bi], cpr1[:, bi], float(cpr2[bi])
         missing.append(dict(任务ID=mid, 时段=si,
                             t起=round(float(sg['t'].min()), 1), t止=round(float(sg['t'].max()), 1),

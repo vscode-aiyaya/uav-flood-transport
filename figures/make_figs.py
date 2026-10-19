@@ -1,14 +1,23 @@
-"""Three IEEE single-column grayscale figures. Ortho L/Z paths only.
-No diagonal arrows. Legend never overlays data.
+"""Three IEEE single-column grayscale figures.
+Schematic diagrams (fig 1/2): right-angle orthogonal paths only, no diagonal
+arrows, legend never overlays data.
+Map panel (fig 3a): real geographic coordinates from the frozen data; transfer
+segments are drawn as the straight direct-flight legs they physically are.
 """
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, Polygon
 import numpy as np
+import pandas as pd
 import os
 
-OUT = os.path.dirname(os.path.abspath(__file__))
+_HERE = os.path.dirname(os.path.abspath(__file__))
+OUT = os.environ.get("FIG_OUT", _HERE)
+_ANALYSIS = os.environ.get("FIG_ANALYSIS",
+                           os.path.normpath(os.path.join(_HERE, "..", "analysis")))
+REPO = _ANALYSIS
+Q3B = os.environ.get("FIG_Q3OUT", os.path.join(_ANALYSIS, "q3_rebuild", "outputs"))
 
 plt.rcParams.update({
     "pdf.fonttype": 42, "ps.fonttype": 42,
@@ -102,21 +111,20 @@ ax.annotate("round trip", xy=(CX_M, CY), xytext=(8, 0),
             xycoords="data", textcoords="offset points",
             fontsize=6.0, color=DGRAY, ha="left", va="center")
 
-# ---- right column: shadowed back-slope relay zone ----
+# ---- right column: one relay sortie in the shadowed back-slope zone ----
 rect(ax, 8.4, 0.6, 3.8, 8.6, fc=WHITE, ec=MGRAY, lw=0.9, ls="--")
-ax.text(CX_R, 8.45, "Shadowed back-slope", ha="center", va="center",
-        fontsize=6.2, color=DGRAY)
+ax.text(CX_R, 8.45, "One relay sortie\n(shadowed back-slope)", ha="center", va="center",
+        fontsize=5.9, color=DGRAY, linespacing=1.25)
 rect(ax, XR, Y_TB, BOX_W, BOX_H, fc=DGRAY, ec=BLACK, lw=0.9)
-ax.text(CX_R, CY_T, "Relay UAV 1", ha="center", va="center",
-        fontsize=7.0, color=WHITE, weight="bold")
+ax.text(CX_R, CY_T, "hover point 1", ha="center", va="center",
+        fontsize=6.8, color=WHITE, weight="bold")
 rect(ax, XR, Y_BB, BOX_W, BOX_H, fc=DGRAY, ec=BLACK, lw=0.9)
-ax.text(CX_R, CY_B, "Relay UAV 2", ha="center", va="center",
-        fontsize=7.0, color=WHITE, weight="bold")
+ax.text(CX_R, CY_B, "hover point 2", ha="center", va="center",
+        fontsize=6.8, color=WHITE, weight="bold")
 
-# multi-hover vertical arrow (right column)
+# multi-hover transfer of the SAME airframe between successive hover points
 ax.plot([CX_R, CX_R], [Y_BB + BOX_H, Y_TB], color=MGRAY, lw=1.0,
         solid_capstyle="round", zorder=5)
-arrow_head(ax, CX_R, Y_BB + BOX_H, "down", color=MGRAY)
 arrow_head(ax, CX_R, Y_TB, "up", color=MGRAY)
 ax.text(9.30, CY, "multi-hover\ndirect\ntransfer", ha="center", va="center",
         fontsize=5.1, color=DGRAY, linespacing=1.3)
@@ -149,9 +157,9 @@ plt.close(fig)
 # ylim starts just below the lowest box so the caption hugs the figure
 fig, ax = new_fig((0, 10.5), (1.95, 12.8))
 
-# top shared caliber band
+# top shared physical-model band
 rect(ax, 0.35, 11.1, 9.8, 1.25, fc=VLGRAY, ec=BLACK, lw=1.0, ls="--")
-ax.text(5.25, 12.05, "Shared physical caliber (all four stages):",
+ax.text(5.25, 12.05, "Shared physical model (all four stages):",
         ha="center", fontsize=6.4, weight="bold")
 ax.text(5.25, 11.5, "DEM cruise altitude | nonlinear equivalent range | two-stage charging",
         ha="center", fontsize=5.8, color=DGRAY)
@@ -163,7 +171,7 @@ YS = [9.1, 6.85, 4.55, 2.25]
 Labs = [
     "Problem 1: DEM-ELBPP\nenergy-aware bin packing",
     "Problem 2: HF-VRPBT\nheterogeneous-fleet routing with time windows",
-    "Problem 3: TD-CJO\njoint transport-communication scheduling (MHPRS)",
+    "Problem 3: MHPRS\nmulti-hover-point relay scheduling (fixed transport plan)",
     "Problem 4: SC-MAE-RG\nclustering / resource accounting / gap analysis",
 ]
 for s, y in zip(Labs, YS):
@@ -193,49 +201,64 @@ fig = plt.figure(figsize=(3.4, 4.2))
 axm = fig.add_axes([0.17, 0.585, 0.80, 0.315])   # top (a)
 axb = fig.add_axes([0.17, 0.135, 0.80, 0.320])   # bottom (b)
 
-# ---------- (a) ----------
+# ---------- (a) real geographic coordinates ----------
 axm.set_xlim(109.155, 109.310); axm.set_ylim(22.980, 23.115)
-rng = np.random.default_rng(7)
-sx = 109.17 + rng.random(15) * 0.12
-sy = 23.00 + rng.random(15) * 0.09
-axm.scatter(sx, sy, s=9, c=LGRAY, marker="o", zorder=2, alpha=0.8)
 
-axm.scatter([109.238], [23.048], s=130, c=MGRAY, marker="*", zorder=4)
-axm.annotate("O01 / G01", xy=(109.238, 23.048), xytext=(-16, 14),
+# real 15 service areas and the real O01/G01 location (frozen node table)
+nodes = pd.read_csv(os.path.join(REPO, "预处理输出", "Q1_节点_预处理.csv"))
+o01 = nodes[nodes["编号"] == "O01"].iloc[0]
+O_lon, O_lat = float(o01["经度"]), float(o01["纬度"])
+svc = nodes[nodes["编号"].astype(str).str.startswith("S")]
+axm.scatter(svc["经度"].astype(float), svc["纬度"].astype(float),
+            s=9, c=LGRAY, marker="o", zorder=2, alpha=0.8)
+axm.scatter([O_lon], [O_lat], s=130, c=MGRAY, marker="*", zorder=4)
+axm.annotate("O01 / G01", xy=(O_lon, O_lat), xytext=(0, -13),
              xycoords="data", textcoords="offset points",
-             fontsize=6.6, color=MGRAY, ha="right", va="bottom")
+             fontsize=6.6, color=MGRAY, ha="center", va="top")
 
-# Chain 1: horizontal-first L, PER1 -> PER3-NE
-p1x, p1y, p1n = 109.28168, 23.02521, "PER1"
-p2x, p2y, p2n = 109.18278, 23.08139, "PER3-NE"
-ortho_L(axm, p1x, p1y, p2x, p1y, color=BLACK, lw=1.1, ls="--")
-axm.plot([p2x, p2x], [p1y, p2y], color=BLACK, lw=1.1, ls="--", solid_capstyle="round", zorder=5)
+# hover-point chains of the two multi-hover sorties, read from the unified
+# frozen plan (script-02 verification summary; consecutive duplicates removed,
+# since R01M1 serves its first two windows from the same physical point)
+plan = pd.read_csv(os.path.join(Q3B, "Q3_重建_冻结方案核验汇总.csv"),
+                   encoding="utf-8-sig")
+def chain_points(mid):
+    g = plan[plan["任务ID"] == mid].sort_values("时段")
+    pts = []
+    for _, r in g.iterrows():
+        p = (float(r["悬停经度"]), float(r["悬停纬度"]))
+        if not pts or abs(p[0] - pts[-1][0]) > 1e-9 or abs(p[1] - pts[-1][1]) > 1e-9:
+            pts.append(p)
+    return pts
+c1 = chain_points("R01M1")   # [PER1_E, PER3-NE]
+c2 = chain_points("R02M2")   # [PER3-SW, PER4]
+
+# Chain 1: straight direct-flight transfer leg, PER1_E -> PER3-NE
+(p1x, p1y), (p2x, p2y) = c1[0], c1[1]
+axm.plot([p1x, p2x], [p1y, p2y], color=BLACK, lw=1.1, ls="--",
+         solid_capstyle="round", zorder=5)
 axm.scatter([p1x], [p1y], s=85, c=WHITE, edgecolors=BLACK, marker="s", zorder=7, linewidths=1.3)
 axm.scatter([p2x], [p2y], s=85, c=WHITE, edgecolors=BLACK, marker="s", zorder=7, linewidths=1.3)
-axm.annotate(p1n, xy=(p1x, p1y), xytext=(10, -16), xycoords="data",
+axm.annotate("PER1_E", xy=(p1x, p1y), xytext=(10, -16), xycoords="data",
              textcoords="offset points", fontsize=6.3, ha="left", va="top")
-axm.annotate(p2n, xy=(p2x, p2y), xytext=(6, 12), xycoords="data",
+axm.annotate("PER3-NE", xy=(p2x, p2y), xytext=(7, 11), xycoords="data",
              textcoords="offset points", fontsize=6.3, ha="left", va="bottom")
-# Chain 1 label shifted right so it clears the Chain-2 label and PER1 marker
-axm.annotate("Chain 1 (R01M1)", xy=(109.262, p1y),
-             xytext=(0, -10), xycoords="data", textcoords="offset points",
-             fontsize=5.6, ha="center", va="top", style="italic")
+axm.annotate("Chain 1 (R01M1)", xy=((p1x + p2x) / 2, (p1y + p2y) / 2),
+             xytext=(14, -8), xycoords="data", textcoords="offset points",
+             fontsize=5.6, ha="left", va="top", style="italic")
 
-# Chain 2: horizontal-first L, PER3-SW -> PER4
-q1x, q1y, q1n = 109.21286, 23.01971, "PER3-SW"
-q2x, q2y, q2n = 109.20278, 23.03139, "PER4"
-ortho_L(axm, q1x, q1y, q2x, q1y, color=DGRAY, lw=1.1, ls=(0, (1.2, 1.0)))
-axm.plot([q2x, q2x], [q1y, q2y], color=DGRAY, lw=1.1, ls=(0, (1.2, 1.0)), solid_capstyle="round", zorder=5)
+# Chain 2: straight direct-flight transfer leg, PER3-SW -> PER4
+(q1x, q1y), (q2x, q2y) = c2[0], c2[1]
+axm.plot([q1x, q2x], [q1y, q2y], color=DGRAY, lw=1.1, ls=(0, (1.2, 1.0)),
+         solid_capstyle="round", zorder=5)
 axm.scatter([q1x], [q1y], s=85, c=WHITE, edgecolors=DGRAY, marker="^", zorder=7, linewidths=1.3)
 axm.scatter([q2x], [q2y], s=85, c=WHITE, edgecolors=DGRAY, marker="^", zorder=7, linewidths=1.3)
-# PER3-SW label moved to the left of its marker at mid-height, clearing Chain-2 label
-axm.annotate(q1n, xy=(q1x, q1y), xytext=(-17, -2), xycoords="data",
+axm.annotate("PER3-SW", xy=(q1x, q1y), xytext=(-17, -2), xycoords="data",
              textcoords="offset points", fontsize=6.3, color=DGRAY, ha="right", va="center")
-axm.annotate(q2n, xy=(q2x, q2y), xytext=(14, 10), xycoords="data",
-             textcoords="offset points", fontsize=6.3, color=DGRAY, ha="left", va="bottom")
-axm.annotate("Chain 2 (R02M2)", xy=((q1x + q2x) / 2, q1y),
-             xytext=(0, -13), xycoords="data", textcoords="offset points",
-             fontsize=5.4, color=DGRAY, ha="center", va="top", style="italic")
+axm.annotate("PER4", xy=(q2x, q2y), xytext=(-7, 11), xycoords="data",
+             textcoords="offset points", fontsize=6.3, color=DGRAY, ha="right", va="bottom")
+axm.annotate("Chain 2 (R02M2)", xy=((q1x + q2x) / 2, (q1y + q2y) / 2),
+             xytext=(-12, -2), xycoords="data", textcoords="offset points",
+             fontsize=5.4, color=DGRAY, ha="right", va="center", style="italic")
 
 axm.set_xlabel("longitude (deg)", fontsize=6.6, labelpad=2)
 axm.set_ylabel("latitude (deg)", fontsize=6.6, labelpad=2)
@@ -244,10 +267,14 @@ axm.set_title("(a)", fontsize=6.4, pad=4)
 axm.tick_params(labelsize=5.6, pad=1.5)
 
 # ---------- (b) ----------
-# one bar per configuration: baseline (1/2/3 airframes) then MHPRS last, so the
-# MHPRS bar is never interleaved between the baseline categories
+# bars read from computed outputs: script-04 single-hover baseline on the
+# canonical demand set, and the script-06 MHPRS verification (11713/11713)
 xpos = np.arange(4)
-vals = [51.0, 62.7, 82.1, 100.0]
+_base = pd.read_csv(os.path.join(Q3B, "Q3_重建_单悬停基线_保障率.csv"),
+                    encoding="utf-8-sig")
+vals = [round(100.0 * float(_base.loc[_base["中继机架数"] == n, "保障需中继点"].iloc[0])
+              / float(_base.loc[_base["中继机架数"] == n, "总需中继点"].iloc[0]), 1)
+        for n in (1, 2, 3)] + [100.0]
 axb.bar(xpos[:3], vals[:3], width=0.58, fc=VLGRAY, ec=BLACK, lw=0.8,
         hatch="///", label="Single-hover round-trip baseline", zorder=3)
 axb.bar([xpos[3]], [vals[3]], width=0.58, fc=DGRAY, ec=BLACK, lw=0.8,
@@ -257,7 +284,7 @@ for xi, v in zip(xpos[:3], vals[:3]):
                  xycoords="data", textcoords="offset points",
                  fontsize=5.8, ha="center", va="bottom", color=DGRAY)
 # MHPRS value ABOVE its bar (never inside: keeps the label off the hatch)
-axb.annotate("100\n(11683/11683)", xy=(xpos[3], vals[3]), xytext=(0, 3),
+axb.annotate("100\n(11713/11713)", xy=(xpos[3], vals[3]), xytext=(0, 3),
              xycoords="data", textcoords="offset points",
              fontsize=5.4, ha="center", va="bottom", color=BLACK,
              weight="bold", linespacing=1.35)

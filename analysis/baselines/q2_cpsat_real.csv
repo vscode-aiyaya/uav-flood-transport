@@ -1,3 +1,0 @@
-﻿method,Cmax_s,Cmax_h,E_kWh,hard_late,soft_min,wall_s,optimal,objective,bound,gap_pct
-greedy,8849.33,2.4581,67.3834,0,126.52,0.0002,,,,
-cp-sat,7584.0,2.1067,64.309,0,5.28,0.305,True,758400643407.0,758400643407.0,0.0

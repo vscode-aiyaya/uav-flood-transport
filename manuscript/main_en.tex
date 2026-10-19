@@ -60,14 +60,14 @@ set-partitioning dynamic programming, giving an 18-trip plan at 59.24~kWh,
 20-trip plan at 65.25~kWh satisfying all 31 hard deadlines. Problem 3 introduces
 a \emph{multi-hover-point direct-transfer} relay mode: two relay UAVs cover all
 11,713 relay-required samples on the 1-s grid (11,645 unique sortie--time pairs)
-at a relay energy of 5.50~kWh, whereas the tested single-hover heuristics attain
+at a relay energy of 5.43~kWh, whereas the tested single-hover heuristics attain
 only 51.0\%, 62.7\% and 82.1\% with one, two and three airframes. On the test
 instance at least two relay airframes must be simultaneously active: two windows
 overlap by 759.8~s with centroids 7188.5~m apart and no single hover point covers
 both. Problem 4 (SC-MAE-RG) compares $K{=}2$ and $K{=}3$ partitions and
 recommends $K{=}2$. A rebuild of the frozen relay plan reproduces the
-relay-required count within 0.3\% and the relay energy within 1.2\%; the weakest
-relay link keeps 0.22~dB of margin above $-90$~dBm.
+relay-required count within 0.3\% and the relay energy within 0.1\%; the weakest
+relay link keeps 0.38~dB of margin above $-90$~dBm.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -162,11 +162,19 @@ ground facilities stand but not how airborne links are maintained during
 delivery; the sensing survey of \cite{li2026} catalogs collaboration patterns
 without a transport--communication optimizer; \cite{yanmaz2023} compares joint
 and decoupled multi-UAV path planning for search and rescue; and \cite{soya2025}
-designs delivery-UAV routes that reserve multi-hop relays. The last two,
-however, treat the relay as a static route constraint rather than a scheduled
-resource: neither decides the relay hover sequence, its transfer flights and
-link re-establishment, nor the turnover of a shared energy-component inventory
-over the transport timeline. The gap addressed here is therefore the sequential,
+designs delivery-UAV routes that reserve multi-hop relays. The closest
+precedent is the HDNF preprint \cite{huang2026hdnf} (an arXiv preprint
+submitted to IEEE, not yet peer reviewed), which jointly optimizes delivery
+task assignment, the 3-D deployment of hovering UAV base stations and
+C2-aware delivery path planning; its link model is a probabilistic
+elevation-angle LoS channel, its base stations hold fixed positions, and its
+objective trades C2 reliability against flight energy and deployment cost in
+synthetic simulations. These works, however, treat the relay as a static
+route constraint or a fixed-position asset rather than a scheduled resource:
+none decides the relay hover sequence, its transfer flights and link
+re-establishment, nor the turnover of a shared energy-component inventory
+over the transport timeline, and none verifies the links against terrain.
+The gap addressed here is therefore the sequential,
 physically consistent chain in which transport batching and routing are fixed
 first and the multi-hover-point relay schedule is then constructed under
 coverage, energy and resource constraints. Table~\ref{tab:rw} positions these
@@ -191,9 +199,11 @@ Transport \& delivery routing &
 UAV communication \& relay & \cite{cuu2026,sabuncu2024,huang2024,yanmaz2023,soya2025}
 & \checkmark & -- & -- \\
 Platform, swarm \& control & \cite{zhang2021,ma2020}
-& -- & -- & \checkmark \\
+& -- & -- & -- \\
 Siting, sensing \& surveys & \cite{li2026,guo2026}
 & -- & \checkmark & -- \\
+Joint delivery \& C2 (preprint) & \cite{huang2026hdnf}
+& \checkmark & -- & -- \\
 This work & & \checkmark & \checkmark & \checkmark \\
 \bottomrule
 \end{tabular}
@@ -357,7 +367,7 @@ $h^{\mathrm{cruise}}$ & cruise altitude (max elev.\ $+50$\,m) & m \\
 SOC & state of charge (return $\ge20\%$) & -- \\
 $C_{\max}$ & mission completion time (latest return) & s \\
 $L_{\mathrm{soft}}$ & accumulated soft delay & min \\
-RSRP & received power (threshold $-90$\,dBm) & dBm \\
+$P_r$ & received power (threshold $-90$\,dBm) & dBm \\
 $\mathcal{P}=\{P_1,\dots,P_K\}$ & task partition ($K{=}2$ or $3$) & -- \\
 $N(P_i,q)$ & peak concurrent demand of $q$ & units \\
 $D$, $G$, $J$ & scale/gap/balance & mixed \\
@@ -435,7 +445,7 @@ than fixing the type in advance. The overall procedure is summarized in Algorith
 \STATE init $dp[0]=(0,0,0)$, others $\infty$; relax candidate batches lexicographically
 \STATE backtrack to output the optimal batching plan
 \STATE scan $\rho=20\%\sim40\%$ and repeat for sensitivity
-\STATE \textbf{output} 18-trip plan, per-area machine/energy, margin sensitivity
+\STATE \textbf{output} optimal batching plan, per-area machine/energy, margin sensitivity
 \end{algorithmic}
 \end{algorithm}
 
@@ -499,15 +509,18 @@ Link feasibility uses a free-space path-loss model with a binary DEM
 line-of-sight occlusion test (10\,dB occlusion loss when blocked):
 \begin{equation}
 \begin{aligned}
-\mathrm{RSRP}=\ &P_t+G_t+G_r-32.45-20\log_{10}f-20\log_{10}d\\
+P_r=\ &P_t+G_t+G_r-32.45-20\log_{10}f-20\log_{10}d\\
 &-L_{\mathrm{obs}}-L_{\mathrm{sys}},
 \end{aligned}
 \end{equation}
-with $L_{\mathrm{obs}}\in\{0,10\}$\,dB and $L_{\mathrm{sys}}=3$\,dB. Both
+with $L_{\mathrm{obs}}\in\{0,10\}$\,dB and $L_{\mathrm{sys}}=3$\,dB; $f$ is
+in MHz, the three-dimensional slant range $d$ is in km, powers are in dBm
+and antenna gains in dBi. Both
 directions (transport$\leftrightarrow$relay and relay$\leftrightarrow$G01) must
-satisfy $\mathrm{RSRP}\ge P_{\mathrm{thr}}=-90$\,dBm. The relay platform is a
+satisfy $P_r\ge P_{\mathrm{thr}}=-90$\,dBm. The relay platform is a
 $23.5$\,kg multi-rotor with a $3.2$\,kWh swappable energy component: it cruises
-at $1.15$\,kW, hovers at $1.05+0.05$\,kW per active served link, recharges in
+at $1.15$\,kW, and draws a flat $1.05+0.05$\,kW over each service window
+($1.05$\,kW platform hover plus $0.05$\,kW communication payload), recharges in
 $1800$\,s under the two-stage charging rule, and must land with
 $\mathrm{SOC}\ge0.20$; six components circulate between the two airframes and
 the chargers.
@@ -532,7 +545,7 @@ solution. Formally, the constraints comprise full-process coverage (each
 transport point is either directly connected to G01 or lies in some sortie's
 service interval with both hops above threshold), relay-before-task
 $s_c\le\min\{t_p\}$, bidirectional link budget
-$\mathrm{RSRP}\ge P_{\mathrm{thr}}$, hover-height limit
+$P_r\ge P_{\mathrm{thr}}$, hover-height limit
 $h_c\le h^{\mathrm{terr}}_c+300$\,m, resource exclusion, return SOC $\ge0.20$,
 component inventory (in-flight plus charging $\le6$), coverage rate
 $\ge\eta_{\mathrm{target}}$, and the transfer--link-establish timing between
@@ -596,7 +609,11 @@ E_{\mathrm{relay}} &= \sum_{c}\!\Big(E^{\mathrm{fly}}_{c}
 +P_{\mathrm{hover}}\tfrac{w_c}{3600}\Big),
 \end{align}
 where $w_c$ is the accumulated hovering wait time within sortie $c$ and
-$E^{\mathrm{fly}}_{c}$ is the outbound/transfer/return flight energy, subject to
+$E^{\mathrm{fly}}_{c}$ is the outbound/transfer/return flight energy. The
+three terms are computed over mutually disjoint intervals of the sortie
+timeline: inter-segment transfer time is charged to $E^{\mathrm{fly}}_{c}$
+and excluded from the served-hover window $[s_c,e_c]$, so no energy is
+double-counted. The stage-3 objective is subject to
 the constraint set listed in the MHPRS definition above. The stage-3 solver is a
 greedy construction over the candidate hover points, so the returned schedule
 satisfies the constraints above but minimizes neither the relay energy nor the
@@ -618,7 +635,7 @@ summarized in Algorithm~\ref{alg:q3}.
 \STATE pack adjacent segments into sorties (multi-hover direct transfer); earliest-available assignment
 \STATE check component turnover (two-stage charging) and return SOC
 \STATE full verification by per-second sampling and boundary checks
-\STATE \textbf{output} 2-UAV / 4-sortie main plan (11,713 sampled relay points, 100\% on the 1-s grid)
+\STATE \textbf{output} relay schedule: hover-point chains, service windows, verified coverage and per-sortie SOC
 \end{algorithmic}
 \end{algorithm}
 
@@ -626,8 +643,11 @@ summarized in Algorithm~\ref{alg:q3}.
 \centering
 \includegraphics[width=0.70\linewidth]{fig_mhprs.pdf}
 \caption{Multi-hover-point direct-transfer relay scheduling mode.
-(a) Hover-point chains of the two relay sorties, where the direct transfer
-between hover points is the decisive factor; (b) coverage of relay-required
+(a) Hover-point chains of the two multi-hover sorties (of the four) on the
+real node coordinates: gray dots are the 15 service areas, the star is the
+dispatch center O01/G01, and each transfer leg is the direct straight flight
+flown between successive hover points (R01M1 serves three windows from its
+two points); (b) coverage of relay-required
 points versus the number of relay airframes under the single-hover round-trip
 baseline, compared with the proposed MHPRS.}
 \label{fig:mhprs}
@@ -744,16 +764,19 @@ Gateway G01 (20\,m mast) & 27\,dBm / 12\,dBi \\
 Table~\ref{tab:q1_baseline} compares the exact dynamic-programming batching with
 the classical FFD, BFD and WFD heuristics over $N{=}30$ randomized instances. On
 average the proposed method returns the fewest trips and the lowest energy
-(67.18\,kWh), and the $2.49\%$ mean energy penalty of the heuristics is
-significant ($p<10^{-4}$, two-sided Wilcoxon signed-rank test). On the real
+(67.18\,kWh), and the energy penalty of the heuristics---$2.49\%$ as the
+relative increase of the mean energy, $2.30\%$ as the mean of the
+per-instance increases---is significant ($p<10^{-4}$, two-sided Wilcoxon
+signed-rank test). On the real
 instance the same ordering holds with a much smaller gap (59.24\,kWh against
 59.65\,kWh, i.e.\ $0.69\%$), so the exact solver's advantage lies in consistent
 behaviour across instances rather than in a single large energy margin. The
 instances use the fixed seed 20251015: the box count is uniform on
 $\{40,\dots,120\}$, the service-area coordinates are jittered with
-$\sigma=0.0005^\circ$, and the categories are resampled from the real case. The
-Wilcoxon statistic uses the 29 non-zero pairs, giving an exact two-sided
-$p=2.56\times10^{-6}$ for FFD and BFD, and the per-instance energy spans
+$\sigma=0.0005^\circ$, and the categories are resampled from the real case. The Wilcoxon statistic uses the 29 non-zero pairs, giving a two-sided
+$p=2.56\times10^{-6}$ for FFD and BFD under the normal approximation (an
+explicit exact enumeration gives $p=3.7\times10^{-9}$, so the significance
+conclusion is unchanged either way), and the per-instance energy spans
 $42.6$--$89.3$\,kWh with $14$--$22$ trips, so the comparison covers instances
 both smaller and larger than the real case.
 
@@ -761,7 +784,7 @@ both smaller and larger than the real case.
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\caption{Comparison of the proposed exact dynamic-programming grouping against classical bin-packing heuristics over $N=30$ randomized instances derived from the real case. Sorties and total energy (in kWh) are reported as mean$\pm$std; the improvement is the mean energy increase relative to the proposed method; $p$-values are from a two-sided Wilcoxon signed-rank test on per-instance total energy (proposed vs.\ each heuristic).}
+\caption{Comparison of the proposed exact dynamic-programming grouping against classical bin-packing heuristics over $N=30$ randomized instances derived from the real case. Sorties and total energy (in kWh) are reported as mean$\pm$std; the improvement is the relative increase of the mean energy, $(\bar E_h-\bar E_p)/\bar E_p$ (the mean of the per-instance increases is $2.30\%$ for FFD/BFD and $2.63\%$ for WFD); $p$-values are from a two-sided Wilcoxon signed-rank test on per-instance total energy (proposed vs.\ each heuristic).}
 \label{tab:q1_baseline}
 \begin{tabular}{lcccc}
 \toprule
@@ -791,54 +814,10 @@ S008), so cross-area chaining pays off only where the inherited batches leave
 small residual loads. The makespan is set by the last C trip to S007, returning
 at $9794$\,s.
 
-To measure the optimality gap of the scheduling layer independently of the
-candidate-structure search, the urgency-first scheduler and an exact CP-SAT
-model (OR-Tools) are given the \emph{same} fixed 20-trip task set and the
-\emph{same} per-trip feasible-type choice set; CP-SAT jointly selects
-aircraft type, numbered airframe, battery and start time under no-overlap and
-two-stage recharge constraints and lexicographically minimizes hard-deadline
-violations, $C_{\max}$, energy and soft delay. Durations are rounded \emph{up}
-to whole seconds, so each CP-feasible schedule is strictly feasible under the
-continuous physics, and the returned schedule is additionally re-checked
-against the continuous energy/time model (zero violations).
-Table~\ref{tab:benchq2}: CP-SAT proves optimality in $0.53$\,s, shortening
-$C_{\max}$ from $2.46$ to $2.11$\,h ($-14.3\%$), energy by $4.6\%$ and soft
-delay from $126.5$ to $5.3$\,min; the task set and physical options are
-identical, so the gap is attributable to the scheduler. On 30 synthetic
-instances drawn from the empirical duration/energy/deadline distributions
-(infeasible ones resampled), CP-SAT wins all 30, $2.47{\pm}0.33$ to
-$2.07{\pm}0.28$\,h (median gain $15.2\%$, Wilcoxon $p{<}10^{-8}$), at $5.0$\,s
-mean wall time, proving optimality on 28/30 within 30\,s. CP-SAT solves only
-the scheduling sub-problem: it receives batched trips and precomputed physical
-options, leaving DEM feasibility and batching-structure enumeration to our chain.
-
-The CP-SAT schedule, computed on the same 20-trip task set, is strictly better
-on makespan, energy and soft delay ($2.11$\,h, $64.31$\,kWh and $5.3$\,min
-against $2.72$\,h, $65.25$\,kWh and $137.6$\,min for the urgency-first plan),
-but it is not adopted as the recommended transport plan: only the urgency-first
-plan has had its full relay demand identified and verified point-by-point, and
-the relay schedule is conditional on the transport timeline, which the CP-SAT
-schedule changes. The relay results below therefore apply to the urgency-first
-plan only, and the recommendation is scoped accordingly.
-
-\begin{table}[t]
-\centering
-\footnotesize
-\setlength{\tabcolsep}{4pt}
-\caption{External solver benchmark for the Problem-2 scheduling layer:
-20 fixed trips, identical aircraft-type choice set for both schedulers
-(wall time, 8-core CPU). CP-SAT was proven optimal; its schedule independently
-re-verified against the continuous model with zero constraint violation.}
-\label{tab:benchq2}
-\begin{tabular}{lcccc}
-\toprule
-Scheduler & $C_{\max}$ (h) & Energy (kWh) & Soft (min) & Wall time \\
-\midrule
-Urgency-first greedy & 2.46 & 67.38 & 126.5 & $<$0.01\,s \\
-CP-SAT (OR-Tools)    & \textbf{2.11} & \textbf{64.31} & \textbf{5.3} & 0.53\,s \\
-\bottomrule
-\end{tabular}
-\end{table}
+The recommended plan is taken forward as the transport input of the relay
+stage. Because the relay schedule is conditional on the transport timeline,
+the relay demand below is identified and verified point-by-point for this
+urgency-first plan only, and the relay results are scoped accordingly.
 
 \begin{table}[t]
 \centering
@@ -900,15 +879,17 @@ increases the direct-connection rate only moderately, from 61.7\% to 63.2\% to
 64.7\%, so the relay requirement is governed mainly by the receiving threshold
 rather than by the clearance margin. The rebuilt four-sortie plan
 assigns 5,340, 508, 1,383 and 4,482 relay-required points to the four sorties,
-with a rebuilt relay energy of $5.50$\,kWh against the frozen $5.43$\,kWh (a
-$1.17\%$ deviation), and the weakest verified link measures $-89.78$\,dBm,
-only $0.22$\,dB above the $-90$\,dBm threshold. Table~\ref{tab:sortie} breaks the
-verification down per sortie: the two multi-hover sorties (R01M1 with three
-hover points, R02M2 with two) carry $83.9\%$ of the relay-required points and
-show the largest, still small, rebuild deviations, because two of their
-inter-hover transfer points are absent from the frozen log and had to be
-re-searched independently, whereas the single-hover
-sorties match the frozen energy within $0.2\%$--$2.4\%$. The reconstruction
+with a rebuilt relay energy of $5.432$\,kWh against the frozen $5.433$\,kWh (a
+$0.02\%$ deviation), and the weakest verified link measures $-89.62$\,dBm,
+$0.38$\,dB above the $-90$\,dBm threshold. Table~\ref{tab:sortie} breaks the
+verification down per sortie: the two multi-hover sorties (R01M1 visiting two
+distinct hover points over three service windows, R02M2 visiting two) carry
+$83.9\%$ of the relay-required points, and their rebuilt energies match the
+frozen log within $1.2\%$ even though one transfer hover point of each is
+absent from the frozen log and had to be re-searched independently; the
+largest per-sortie deviation ($-3.3\%$ on the single-hover R02M1) stems from
+the prior climb-efficiency value being higher than the one implicit in the
+frozen log, not from hover-point uncertainty. The reconstruction
 rule is conservative: the canonical demand set contains $11{,}713$ logged
 one-second rows with $68$ boundary duplicates ($11{,}645$ unique
 sortie--time pairs), and
@@ -929,18 +910,19 @@ frozen plan itself unaffected.
 \caption{Per-sortie verification of the four-sortie relay plan. Points are logged
 one-second samples (11,645 unique after removing 68 boundary duplicates); energy
 is the rebuilt value against the frozen log (kWh); SOC is the rebuilt return
-state of charge; R01 flies M1--M2, R02 flies M1--M2.}
+state of charge; R01 flies M1--M2, R02 flies M1--M2. ($\times$2): the same
+physical hover point serves two service windows.}
 \label{tab:sortie}
 \begin{tabular}{llcccc}
 \toprule
 Sortie & Hover-point chain & Points & Energy (kWh) & SOC \\
 \midrule
-R01M1 & PER1\_E$\to$PER2$\to$PER3\_NE & 5340 & 1.939 / 1.823 & 0.394 \\
+R01M1 & PER1\_E ($\times$2) $\to$ PER3\_NE & 5340 & 1.821 / 1.823 & 0.431 \\
 R01M2 & single hover point & 508 & 1.059 / 1.056 & 0.669 \\
 R02M1 & single hover point & 1383 & 0.678 / 0.701 & 0.788 \\
-R02M2 & PER3\_SW$\to$PER4 & 4482 & 1.820 / 1.853 & 0.431 \\
+R02M2 & PER3\_SW$\to$PER4 & 4482 & 1.874 / 1.853 & 0.414 \\
 \midrule
-Total & 7 hover points, 7 service windows & 11713 & 5.497 / 5.433 & -- \\
+Total & 6 hover points, 7 windows & 11713 & 5.432 / 5.433 & -- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1101,8 +1083,9 @@ control shows cross-group relay sharing, not vehicle count, to be binding.
 
 Two threats to validity deserve emphasis. First, the energy model is validated
 only against frozen computational artifacts: the reconstruction reproduces the
-relay-required count within 0.3\% and the relay energy within 1.2\%, but two of
-the seven hover points are re-derived from the DEM grid rather than read from the
+relay-required count within 0.3\% and the relay energy within 0.1\%, but the
+hover points of two of the seven service windows are re-derived from the DEM
+grid rather than read from the
 frozen log, so this is a reconstruction check rather than an independent flight
 measurement, and no hardware flight test has been performed; wind, payload-drag
 and battery-aging effects could shift the absolute figures. Second, relay
@@ -1113,11 +1096,9 @@ the stated link model, and the candidate search may miss short-duration
 blockage events. Further limitations are that link feasibility is judged by a
 binary DEM line-of-sight test with a fixed occlusion loss, and that the
 environment is deterministic and does not model weather or equipment faults. For
-Problem 2, optimality is certified only for the scheduling sub-problem on a fixed
-trip set, where CP-SAT quantifies the greedy gap at about $15\%$ in makespan; the
-joint batching--routing--scheduling optimum is
-not searched, so the $65.25$\,kWh main plan remains the best of the enumerated
-candidate structures rather than a proven joint optimum. Because the parameters
+Problem 2, the joint batching--routing--scheduling optimum is not searched, so
+the $65.25$\,kWh main plan remains the best of the enumerated candidate
+structures under the urgency-first scheduler rather than a proven joint optimum. Because the parameters
 are data-driven, the model chain can be transferred to other mountainous
 disaster settings, but the reported fleet configuration and coverage figures
 are instance-specific.
@@ -1141,7 +1122,7 @@ batching model returns an 18-trip plan at 59.24\,kWh with a verified optimality
 benchmark; the heterogeneous routing model delivers all 80 boxes, satisfies all
 31 hard deadlines and recommends a 20-trip plan at 65.25\,kWh; and the relay
 stage covers all 11,713 sampled relay-required points with two airframes and four
-sorties at 5.50\,kWh (joint 70.75\,kWh). The partitioning stage then quantifies
+sorties at 5.43\,kWh (joint 70.68\,kWh). The partitioning stage then quantifies
 the resource gap and produces an explicit augmentation list. The sensitivity
 studies delineate the operating envelope: the batching solution tolerates return
 margins up to $35\%$ before failing at $40\%$, the relay demand is governed by the
@@ -1159,9 +1140,9 @@ the single-scenario plans into robust or chance-constrained counterparts.
 depots with cross-depot sharing of airframes and batteries, which would relax
 the resource-replication penalty quantified here. (iv)~The scheduling layer should
 be coupled with the batching-structure decision inside one exact or
-adaptive large-neighborhood-search model---our CP-SAT benchmark certifies the
-fixed-trip scheduling optimum but the joint optimum remains unsearched---and
-the benchmark family should be extended to instances larger than 20 trips.
+adaptive large-neighborhood-search model, since the joint optimum remains
+unsearched, and the benchmark family should be extended to instances larger
+than 20 trips.
 
 % =====================================================================
 \section*{Acknowledgment}
@@ -1246,6 +1227,11 @@ planning for search and rescue,'' \emph{Ad Hoc Networks}, vol.~138, p.~103018,
 \bibitem{soya2025} H.~Soya, K.~Inagaki, and H.~So, ``A flight route design method
 considering multi-hop communication using delivery UAVs,'' \emph{Drones},
 vol.~9, no.~11, p.~751, 2025, doi: 10.3390/drones9110751.
+\bibitem{huang2026hdnf} P.~Huang, B.~Duo, Z.~Godfred, L.~Huo, J.~Ning,
+X.~Yuan, and J.~Li, ``A heterogeneous dual-network framework for emergency
+delivery UAVs: Communication assurance and path planning coordination,''
+arXiv preprint arXiv:2604.12501 [cs.IT], 2026 (submitted to IEEE for
+possible publication), doi: 10.48550/arXiv.2604.12501.
 \end{thebibliography}
 
 \end{document}
