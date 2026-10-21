@@ -33,11 +33,11 @@
 \title{Multi-Hover-Point Relay Scheduling for UAV Emergency Delivery under a
 Fixed Transport Plan}
 
-\author{Yang Xin\textsuperscript{*}, Zhao Zidong, Song Yuwei\\
+\author{Xin Yang\textsuperscript{*}, Zidong Zhao, Yuwei Song\\
 \textit{School of Mechanical and Power Engineering, Zhengzhou University}\\
 Zhengzhou, Henan 450001, China\\
 Email: xinyang.zzu@outlook.com
-\thanks{\textsuperscript{*}Corresponding author: Yang Xin
+\thanks{\textsuperscript{*}Corresponding author: Xin Yang
 (e-mail: xinyang.zzu@outlook.com).}
 }
 
@@ -61,10 +61,12 @@ set-partitioning dynamic programming, giving an 18-trip plan at 59.24~kWh,
 a \emph{multi-hover-point direct-transfer} relay mode: two relay UAVs cover all
 11,713 relay-required samples on the 1-s grid (11,645 unique sortie--time pairs)
 at a relay energy of 5.43~kWh, whereas the tested single-hover heuristics attain
-only 51.0\%, 62.7\% and 82.1\% with one, two and three airframes. On the test
-instance at least two relay airframes must be simultaneously active: two windows
-overlap by 759.8~s with centroids 7188.5~m apart and no single hover point covers
-both. Problem 4 (SC-MAE-RG) compares $K{=}2$ and $K{=}3$ partitions and
+only 51.0\%, 62.7\% and 82.1\% with one, two and three airframes. On this
+instance two relay airframes are scheduled concurrently: two service windows
+overlap by 759.8~s with point-cloud centroids 7188.5~m apart, and the best of
+397 candidate hover points covers only 2567 of their 3765 relay-required points,
+so no single-airframe plan was found. Problem 4 (SC-MAE-RG) compares $K{=}2$ and
+$K{=}3$ partitions and
 recommends $K{=}2$. A rebuild of the frozen relay plan reproduces the
 relay-required count within 0.3\% and the relay energy within 0.1\%; the weakest
 relay link keeps 0.38~dB of margin above $-90$~dBm.
@@ -216,8 +218,9 @@ claimed as new. Within that scope:
 \item \textbf{Multi-hover-point relay scheduling (MHPRS), the core
 contribution.} We formalize a mode in which one relay UAV serves several hover
 points per take-off/return cycle, state the mode-dominance proposition (the
-single-hover feasible set is a subset) and derive a concurrency lower bound on
-relay airframes from overlapping transfer windows. Two relay UAVs cover all
+single-hover feasible set is a subset) and characterize, for the test instance,
+the concurrent service windows that motivate the two-airframe plan. Two relay
+UAVs cover all
 11,713 sampled relay-required points on the 1-s grid, against 51.0\%, 62.7\% and
 82.1\% for the tested single-hover heuristics with one, two and three airframes.
 \item \textbf{A consistent, independently verified implementation.} Each
@@ -567,7 +570,7 @@ uncovered, and the resulting adjacent segments are packed into sorties under the
 component-inventory and return-SOC constraints with earliest-available assignment
 of the two airframes.
 
-\textbf{Proposition 1 (mode dominance).} Let $\mathcal{S}_{\mathrm{SH}}$ be
+\textbf{Proposition 1 (mode dominance, elementary).} Let $\mathcal{S}_{\mathrm{SH}}$ be
 the set of coverage plans feasible when every sortie is restricted to a single
 hover point, and $\mathcal{S}_{\mathrm{MH}}$ the set feasible under MHPRS with
 ordered hover-point chains. Then
@@ -588,17 +591,17 @@ cannot raise the optimum.\hfill $\square$
 $51.0\%$, $62.7\%$ and $82.1\%$ with one, two and three airframes, whereas
 MHPRS covers all 11,713 sampled relay-required points with four sorties.
 
-\textbf{Proposition 2 (relay concurrency lower bound on the test instance).}
-Any feasible MHPRS plan for the test instance requires at least two relay
-airframes to be active simultaneously. \emph{Proof.} Two first-segment service
-windows overlap, $[751.8,1512.6]$\,s and $[752.8,1712.7]$\,s, sharing $759.8$\,s
-of time, while their point-cloud centroids lie $7188.5$\,m apart. Let $U$ be the
-union of their relay-required points ($3765$ points). Enumerating all $397$
-candidate hover points, none covers $U$ (the best single point covers $2567$).
-Since the two windows are active during their overlap, one airframe would have
-to occupy a single hover point covering both segments at once, which does not
-exist; hence at least two relay airframes must be active simultaneously.\hfill
-$\square$
+\textbf{Observation 1 (relay concurrency on the test instance).} In the
+evaluated candidate pool, a single relay airframe is not sufficient for the test
+instance. Two first-segment service windows overlap, $[751.8,1512.6]$\,s and
+$[752.8,1712.7]$\,s, sharing $759.8$\,s of time, while their point-cloud
+centroids lie $7188.5$\,m apart. The union of their relay-required points
+contains $3765$ samples; of the $397$ enumerated candidate hover points the best
+covers $2567$, and the single-airframe schedule search returns no feasible plan.
+The two-airframe plan is therefore used. This requirement is empirical: it rests
+on exhaustive enumeration over the evaluated candidate pool and on the failure
+of the single-airframe search, not on a geometric lower bound, because an MHPRS
+airframe may relocate between hover points.
 
 The combined stage-3 objective is
 \begin{align}
@@ -616,8 +619,8 @@ double-counted. The stage-3 objective is subject to
 the constraint set listed in the MHPRS definition above. The stage-3 solver is a
 greedy construction over the candidate hover points, so the returned schedule
 satisfies the constraints above but minimizes neither the relay energy nor the
-sortie count in a proven sense; Proposition~2 certifies only the two-airframe
-lower bound. The resulting
+sortie count in a proven sense; Observation~1 supports the two-airframe plan
+only within the evaluated candidate pool. The resulting
 multi-hover-point direct-transfer mode, together with its coverage advantage
 over the single-hover baseline, is illustrated in Fig.~\ref{fig:mhprs} and
 summarized in Algorithm~\ref{alg:q3}.
@@ -880,7 +883,8 @@ $\rho$ & Trips & Energy (kWh) & Duration (h) & Remark \\
 
 For the relay stage, Table~\ref{tab:threshold} tightens the receiving
 threshold: from $-98$ to $-95$ to $-90$\,dBm the relay-required points grow
-from 0 to 806 to 2311 and the directly served areas shrink from 15 to 10 to 3.
+from 0 to 806 to 2311 (the last figure is the stricter $-90$\,dBm case, not the
+baseline population of 11,713) and the directly served areas shrink from 15 to 10 to 3.
 Under the single-hover-point round-trip baseline only 51.0\%, 62.7\% and
 82.1\% of these points are covered by one, two and three airframes, so the
 tested single-hover heuristics fall short of full coverage. Raising the safety
@@ -980,8 +984,9 @@ evaluated candidate satisfying the three-area rule achieves fewer cross-group
 relays for either $K$, so the comparison is decided on scale and gap. The
 single-hover baseline of Fig.~\ref{fig:mhprs}(b) is evaluated under exactly
 the same link budget, airframe inventory, per-sortie energy model, return-SOC
-floor and two-stage charging rule as MHPRS, so the coverage gap is
-attributable to the mode rather than to more generous resources.
+floor and two-stage charging rule as MHPRS, so the coverage gap reflects the
+mode under the tested implementations rather than more generous resources; the
+baseline is a one-hover-per-sortie heuristic, not a proven optimum of that mode.
 
 The resource-directed enumeration is benchmarked against generic unsupervised
 clustering: $K$-means ($100$ restarts) and Ward agglomerative clustering on
@@ -1006,7 +1011,8 @@ singleton group ($1{+}14$; $1{+}7{+}7$ and $1{+}5{+}9$ for
 $K{=}3$). These outputs satisfy the shared-sortie coupling---T18, the only
 multi-area sortie, links S011 and S008, which remain together, and S001's
 trips are single-area---so they are feasible under the one-area rule and
-indeed minimize $D/G$; they are inadmissible only under the three-area rule
+attain the smallest $D/G$ among the evaluated candidates; they are inadmissible
+only under the three-area rule
 and are reported for completeness rather than adopted. Generic clustering thus
 minimizes feature dispersion without
 perceiving peak concurrency or the non-splittable shared-sortie coupling.
@@ -1105,7 +1111,12 @@ hover points of two of the seven service windows are re-derived from the DEM
 grid rather than read from the
 frozen log, so this is a reconstruction check rather than an independent flight
 measurement, and no hardware flight test has been performed; wind, payload-drag
-and battery-aging effects could shift the absolute figures. Second, relay
+and battery-aging effects could shift the absolute figures. The reconstructed
+timeline also assumes an aggregate $37$\,s climb allowance for A/B departures
+(those samples remain directly connected), a raised corridor on S007 legs, and a
+$6$\,m clearance with bilinear interpolation in the direct-link test; the
+relay-coverage test uses the raw DEM profile, so full coverage is an upper bound
+under the $6$\,m convention. Second, relay
 demand is identified on a five-second search grid, which underestimates the
 relay-required population relative to the one-second verification grid; the
 11,713-sample coverage claim therefore holds only on the one-second grid under
@@ -1115,18 +1126,16 @@ binary DEM line-of-sight test with a fixed occlusion loss, and that the
 environment is deterministic and does not model weather or equipment faults. For
 Problem 2, the joint batching--routing--scheduling optimum is not searched, so
 the $65.25$\,kWh main plan remains the best of the enumerated candidate
-structures under the urgency-first scheduler rather than a proven joint optimum. Because the parameters
-are data-driven, the model chain can be transferred to other mountainous
-disaster settings, but the reported fleet configuration and coverage figures
-are instance-specific.
+structures under the urgency-first scheduler rather than a proven joint optimum.
+Because the parameters are data-driven, the chain transfers to other mountainous
+settings, but the reported fleet configuration and coverage figures are
+instance-specific.
 
-Transferring the chain to a new site requires re-running, not re-designing:
-recompute the machine--area safe-payload table from a regional DEM, survey the
-available fleet, batteries and relay components into the parameter tables,
-re-identify the relay-required population from the planned trajectories, and run
-the four stages in order. Only the Problem-2 tour enumeration and the Problem-3
-per-second verification grow noticeably with instance size, and both are
-embarrassingly parallel.
+Transferring the chain to a new site requires re-running rather than
+re-designing: recompute the safe-payload table from a regional DEM, enter the
+available fleet into the parameter tables, re-identify the relay-required
+population, and run the four stages in order; the tour enumeration and the
+per-second verification are embarrassingly parallel.
 
 % =====================================================================
 \section{Conclusion}
@@ -1141,20 +1150,16 @@ benchmark; the heterogeneous routing model delivers all 80 boxes, satisfies all
 stage covers all 11,713 sampled relay-required points with two airframes and four
 sorties at 5.43\,kWh (joint 70.68\,kWh). The partitioning stage then quantifies
 the resource gap and produces an explicit augmentation list. The sensitivity
-studies delineate the operating envelope: the batching solution tolerates return
-margins up to $35\%$ before failing at $40\%$, the relay demand is governed by the
-receiving threshold rather than the terrain clearance, and among the tested
-configurations only the multi-hover mode reaches full coverage on the one-second
-grid with the available two relay airframes.
+studies delineate the envelope: batching tolerates return margins up to $35\%$
+(failing at $40\%$), relay demand is governed by the receiving threshold rather
+than the terrain clearance, and only the multi-hover mode reaches full coverage
+on the 1-s grid with two airframes.
 
-Further work should (i)~replace the one-second discrete verification with
-event-driven continuous-time link checking, (ii)~add wind, weather and
-stochastic demand for robust or chance-constrained plans, (iii)~generalize the
-single depot to multi-depot sharing of airframes and batteries, and (iv)~couple
-the scheduling layer with batching inside one exact or
-large-neighborhood-search model, extending the benchmark to end-to-end
-geographic families with reported acceptance rates rather than reading heuristic
-failure as infeasibility.
+Further work should replace the one-second grid with event-driven
+continuous-time link checking, add wind, weather, stochastic demand and
+multi-depot sharing of airframes and batteries, and couple scheduling with
+batching inside one exact or large-neighborhood-search model, with end-to-end
+geographic families whose screened instances report acceptance rates.
 
 % =====================================================================
 \section*{Acknowledgment}
