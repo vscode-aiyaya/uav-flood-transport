@@ -78,7 +78,7 @@ CX_L, CX_M, CX_R = XL + BOX_W / 2, XM + BOX_W / 2, XR + BOX_W / 2
 # ---- left column: dispatch center ----
 rect(ax, 0.25, 0.6, 3.9, 8.6, fc=WHITE, ec=BLACK, lw=1.2)
 ax.text(CX_L, 8.45, "Dispatch center O01", ha="center", va="center",
-        fontsize=6.4, weight="bold")
+        fontsize=5.6, weight="bold")
 rect(ax, XL, Y_TB, BOX_W, BOX_H, fc=WHITE, ec=BLACK, lw=0.9)
 ax.text(CX_L, CY_T + 0.42, "Gateway G01", ha="center", va="center",
         fontsize=7.0, weight="bold")
@@ -98,7 +98,7 @@ ax.text(CX_M, CY_T - 0.40, "Type A / B / C", ha="center", va="center",
         fontsize=6.2, color=DGRAY)
 rect(ax, XM, Y_BB, BOX_W, BOX_H, fc=LGRAY, ec=BLACK, lw=1.0, ls="--")
 ax.text(CX_M, CY_B + 0.42, "15 service areas", ha="center", va="center",
-        fontsize=6.5, weight="bold")
+        fontsize=5.8, weight="bold")
 ax.text(CX_M, CY_B - 0.40, "return margin 20%", ha="center", va="center",
         fontsize=6.2, color=DGRAY)
 
