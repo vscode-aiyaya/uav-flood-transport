@@ -266,8 +266,8 @@ axm.plot([p1x, p2x], [p1y, p2y], color=BLACK, lw=0.9, ls="--",
          solid_capstyle="round", zorder=5)
 axm.scatter([p1x], [p1y], s=62, c=WHITE, edgecolors=BLACK, marker="s", zorder=7, linewidths=1.1)
 axm.scatter([p2x], [p2y], s=62, c=WHITE, edgecolors=BLACK, marker="s", zorder=7, linewidths=1.1)
-axm.annotate("PER1_E", xy=(p1x, p1y), xytext=(4, 2), xycoords="data",
-             textcoords="offset points", fontsize=5.0, ha="left", va="bottom")
+axm.annotate("PER1_E", xy=(p1x, p1y), xytext=(5, 0), xycoords="data",
+             textcoords="offset points", fontsize=5.0, ha="left", va="center")
 axm.annotate("PER3-NE", xy=(p2x, p2y), xytext=(6, 9), xycoords="data",
              textcoords="offset points", fontsize=5.3, ha="left", va="bottom")
 
@@ -279,7 +279,7 @@ axm.scatter([q1x], [q1y], s=62, c=WHITE, edgecolors=DGRAY, marker="^", zorder=7,
 axm.scatter([q2x], [q2y], s=62, c=WHITE, edgecolors=DGRAY, marker="^", zorder=7, linewidths=1.1)
 axm.annotate("PER3-SW", xy=(q1x, q1y), xytext=(-15, -2), xycoords="data",
              textcoords="offset points", fontsize=5.3, color=DGRAY, ha="right", va="center")
-axm.annotate("PER4", xy=(q2x, q2y), xytext=(-5, 2), xycoords="data",
+axm.annotate("PER4", xy=(q2x, q2y), xytext=(-6, 4), xycoords="data",
              textcoords="offset points", fontsize=5.3, color=DGRAY, ha="right", va="bottom")
 
 # chain identifiers go into an axes legend placed in the empty upper-left
