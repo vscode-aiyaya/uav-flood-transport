@@ -1,5 +1,7 @@
 __pycache__/
 *.pyc
+*.aux
+*.log
 *.png
 !figures/*.pdf
 .DS_Store

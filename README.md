@@ -38,7 +38,8 @@ shipped data; nothing is hard-coded from the contest solution.
 │   │   ├── 06_规范集合核验.py      # coverage on the canonical 11 713-point set
 │   │   ├── 07_能耗SOC_核验方案.py  # energy/SOC under the prior eta_c = 0.72
 │   │   ├── 08_固定方案可行性核验.py
-│   │   ├── 09_下界_中继机数.py     # >= 2 relay-airframe lower bound (Proposition 2)
+│   │   ├── 09_下界_中继机数.py     # >= 2 relay-airframe lower bound (Observation 1)
+│   │   ├── 10_只读验证器.py        # read-only feasibility + clearance-convention audit
 │   │   └── outputs/             # canonical artifacts of the single chain 01->02->06->07->08
 │   ├── Q4_分区核算_v3.py        # P4 SC-MAE-RG resource accounting
 │   ├── Q4_TOPSIS.py / Q4_绘图_v3.py
@@ -96,6 +97,7 @@ python q3_rebuild/06_规范集合核验.py        # coverage on the canonical po
 python q3_rebuild/07_能耗SOC_核验方案.py    # energy/SOC under eta_c = 0.72
 python q3_rebuild/08_固定方案可行性核验.py  # read-only feasibility of the fixed plan
 python q3_rebuild/09_下界_中继机数.py       # >= 2 relay-airframe lower bound
+python q3_rebuild/10_只读验证器.py          # read-only feasibility audit; writes to outputs_B
 
 # Stage 4 — resource partitioning
 python Q4_分区核算_v3.py
@@ -143,6 +145,18 @@ baseline (`04`) applies the **same** per-sortie energy model, return-SOC floor
 (0.20) and two-stage charging rule (`T_chg = 500 + 1300*(1-SOC)` s) as the main
 method; after unification the covered-point counts (5968 / 7347 / 9611 for
 N = 1/2/3) are unchanged.
+
+`10_只读验证器.py` audits the frozen plan without searching coordinates: it
+rebuilds coverage, the arrival chain, the transfer clearance and the
+machine/component occupancy from the frozen artifacts alone. It also quantifies
+the clearance convention. The demand side is generated with a 6 m terrain
+clearance and bilinear interpolation, whereas the coverage test uses the raw
+DEM profile and nearest pixels; under the 6 m convention 9679 of 11713 points
+pass (82.63 %), one reconstructed hover point falls 0.96 dB short on its
+depot link, and relocating that point by 256 m restores 100 % coverage with
+582 s of arrival slack, return SOC 0.41 and sortie energy 1.2 % above the
+frozen value. The paper therefore reports the 100 % figure as tied to the
+reconstruction convention and states the 6 m re-check explicitly.
 
 Key deterministic settings:
 
