@@ -121,7 +121,7 @@ cd ../../figures && python make_figs.py
 | P3 threshold sensitivity (-90 / -95 / -98 dBm) | relay-required points 2311 / 806 / 0; directly served areas 3 / 10 / 15 |
 | P3 weakest relay link | -89.62 dBm (TR<->relay), 0.38 dB above the -90 dBm threshold |
 | Joint transport + relay energy | 70.68 kWh |
-| P4 recommended K = 2 partition | D = 31, G = 5, J = 0.613 (best valid partition vs all clustering baselines) |
+| P4 recommended K = 2 partition | D = 31, G = 5, J = 0.613 (best partition among evaluated candidates satisfying the >= 3-area grouping rule) |
 
 ### Problem-3 independent verification
 
@@ -138,7 +138,11 @@ is fitted to the frozen results — under which the rebuilt relay energy is
 from the frozen log are reconstructed once in `02_冻结方案独立核验.py` under the
 paper's Sec. 5.3.2 rule (full coverage first, then nearest to the segment
 centroid); `06`/`07`/`08` all read that single hover-point chain, so coverage,
-energy and feasibility are verified on identical coordinates.
+energy and feasibility are verified on identical coordinates. The single-hover
+baseline (`04`) applies the **same** per-sortie energy model, return-SOC floor
+(0.20) and two-stage charging rule (`T_chg = 500 + 1300*(1-SOC)` s) as the main
+method; after unification the covered-point counts (5968 / 7347 / 9611 for
+N = 1/2/3) are unchanged.
 
 Key deterministic settings:
 

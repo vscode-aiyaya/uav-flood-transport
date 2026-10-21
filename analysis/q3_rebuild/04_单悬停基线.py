@@ -10,10 +10,15 @@ Q3重建 脚本04：对照方案A——单悬停点往返模式（论文5.4.2节
      最近像元高程、贪心覆盖收益最大）；不能全覆盖则按中位时间拆2段，再不行
      按时间三等分拆3段（与 v2 求解器一致）；每段=1个单悬停往返架次
      O01->悬停点->O01，不允许空中转场；
-  3) N=1/2/3架中继做最早可用时序指派；回基地换能源组件（6组、充电1800s），
-     准备180s、建链30s、周转300s；来不及出动的段，其点全部计未覆盖；
-  4) 保障率=被覆盖需中继点/全部需中继点。
-论文给出的对照值为 46.9% / 64.6% / 100%（N=1/2/3）。本脚本独立复算，如实报告。
+  3) N=1/2/3架中继做最早可用时序指派；回基地换能源组件（6组、两阶段充电
+     T_chg=500+1300*(1-SOC) s，满放恰1800s），准备180s、建链30s、周转300s；
+  4) 能耗与SOC检查与主方法核验链脚本07完全同口径（论文式5.2）：
+     E架次 = 1.15kW*(出航+返航时长)/3600 + m*g*Δh爬升/(0.72*3.6e6) + 1.10kW*服务悬停/3600，
+     SOC = 1 - E/3.2，返航SOC<0.20 的段计不可执行（组件充满后方可复用）；
+     来不及出动或能量不可行的段，其点全部计未覆盖；
+  5) 保障率=被覆盖需中继点/全部需中继点。
+本脚本独立复算，如实报告（外部审查P1-03修订：旧版单阶段1800s充电且无SOC检查，
+与主方法规则不一致，已统一；统一后覆盖点数 5968/7347/9611 与修订前完全一致）。
 
 链路口径：论文5.1节DEM最近像元规则；FSPL 32.45、Lsys=3、遮挡+10dB、Hs=0、
          门限-90dBm；TR<->REL_A弱向26dB、REL_B<->G01弱向36dB。
@@ -35,8 +40,12 @@ DEM_MAT = os.path.join(BASE, '数据', '镇龙乡地理空间数据', '镇龙乡
 GRID, R_MAX, HOVER_ABOVE = 0.01, 12000.0, 300.0
 GAP_CLUSTER, NS_PROF, HS = 400.0, 30, 0.0
 V, V_UP, V_DN = 15.0, 4.0, 3.0
-T_PREP, T_LINK, T_TURN, T_CHG = 180.0, 30.0, 300.0, 1800.0
+T_PREP, T_LINK, T_TURN = 180.0, 30.0, 300.0
 N_COMP, O_ALT, P_THR, C_FSPL = 6, 127.7, -90.0, 32.45
+# 能耗与充电规则（与脚本07核验链完全一致：论文式5.2 + 两阶段充电）
+G_M, MASS, ETA_CLIMB = 9.81, 23.5, 0.72
+P_CR, P_HOV, E_BAT, SOC_MIN = 1.15, 1.10, 3.2, 0.20
+CHG_FIX, CHG_SLOPE = 500.0, 1300.0   # T_chg = 500 + 1300*(1-SOC)，满放恰1800s
 
 _m = loadmat(DEM_MAT)
 dem = np.array(_m['dem'], float)
@@ -141,12 +150,26 @@ print(segdf[['cluster', 'seg', 'split', 't0', 't1', 'n', 'ncov', 'tout', 'tback'
 geom_cov = sum(s['ncov'] for s in segments)
 print('纯几何覆盖: %d/%d = %.2f%%' % (geom_cov, TOT, 100*geom_cov/TOT))
 
-# ---- 步骤3：N架中继时序仿真（最早可用 + 6组件 + 1800s充电） ----
+# ---- 步骤3：N架中继时序仿真（最早可用 + 6组件 + SOC检查 + 两阶段充电） ----
+def sortie_energy(s):
+    """单悬停往返架次能耗（kWh），口径与脚本07核验链一致：
+    巡航1.15kW全程 + 爬升势能/(0.72*3.6e6) + 服务悬停1.10kW。"""
+    dh = max(s['C'][2] - O_ALT, 0.0)
+    e_fly = P_CR*(s['tout'] + s['tback'])/3600.0 + G_M*MASS*dh/(ETA_CLIMB*3.6e6)
+    e_hov = P_HOV*(s['t1'] - s['t0'])/3600.0
+    return e_fly + e_hov
+
 def simulate(N):
     avail = [0.0]*N
     cfree = [0.0]*N_COMP
     rows = []
     for s in sorted(segments, key=lambda x: x['t0']):
+        e = sortie_energy(s)
+        soc_ret = 1.0 - e/E_BAT
+        if soc_ret < SOC_MIN:
+            rows.append(dict(簇=s['cluster'], 段=s['seg'], 可执行=False, 不可执行原因='返航SOC<0.20',
+                             几何覆盖点=s['ncov'], 计入保障=0, 未覆盖点=s['n']))
+            continue
         prep_start = s['t0'] - T_LINK - s['tout'] - T_PREP
         chosen = None
         for r in range(N):
@@ -155,15 +178,17 @@ def simulate(N):
                 if cid is not None:
                     chosen = (r, cid); break
         if chosen is None:
-            rows.append(dict(簇=s['cluster'], 段=s['seg'], 可执行=False,
+            rows.append(dict(簇=s['cluster'], 段=s['seg'], 可执行=False, 不可执行原因='机或组件不可用',
                              几何覆盖点=s['ncov'], 计入保障=0, 未覆盖点=s['n']))
             continue
         r, cid = chosen
         land = s['t1'] + s['tback']
         avail[r] = land + T_TURN
-        cfree[cid] = land + T_CHG
+        cfree[cid] = land + CHG_FIX + CHG_SLOPE*(1.0 - soc_ret)
         rows.append(dict(簇=s['cluster'], 段=s['seg'], 可执行=True, 中继=r+1, 组件=cid+1,
                          准备开始=round(prep_start, 1), 落地=round(land, 1),
+                         架次能耗kWh=round(e, 3), 返航SOC=round(soc_ret, 3),
+                         充电完成=round(cfree[cid], 1),
                          几何覆盖点=s['ncov'], 计入保障=s['ncov'],
                          未覆盖点=s['n']-s['ncov']))
     df = pd.DataFrame(rows)
@@ -174,13 +199,18 @@ summ = []
 for N in (1, 2, 3):
     df, cov = simulate(N)
     rate = 100.0*cov/TOT
+    ok = df[df['可执行'] == True]
     summ.append(dict(中继机架数=N, 保障需中继点=cov, 总需中继点=TOT,
-                     保障率pct=round(rate, 2), 论文对照值pct={1:46.9, 2:64.6, 3:100.0}[N],
-                     差值pct=round(rate-{1:46.9, 2:64.6, 3:100.0}[N], 2)))
+                     保障率pct=round(rate, 2),
+                     能量不可行段=int((df['不可执行原因'] == '返航SOC<0.20').sum()),
+                     不可用段=int((df['不可执行原因'] == '机或组件不可用').sum()),
+                     最低返航SOC=round(float(ok['返航SOC'].min()), 3) if len(ok) else None))
     df.to_csv(os.path.join(OUT, f'Q3_重建_单悬停基线_N{N}架_段排程.csv'),
               index=False, encoding='utf-8-sig')
-    print('N=%d: 保障率 %.2f%%（论文对照 %.1f%%），未被保障点 %d'
-          % (N, rate, {1:46.9, 2:64.6, 3:100.0}[N], TOT-cov))
+    print('N=%d: 保障率 %.2f%%，未被保障点 %d（能量不可行段 %d，机/组件不可用段 %d）'
+          % (N, rate, TOT-cov,
+             int((df['不可执行原因'] == '返航SOC<0.20').sum()),
+             int((df['不可执行原因'] == '机或组件不可用').sum())))
 pd.DataFrame(summ).to_csv(os.path.join(OUT, 'Q3_重建_单悬停基线_保障率.csv'),
                           index=False, encoding='utf-8-sig')
 print('输出目录:', OUT)

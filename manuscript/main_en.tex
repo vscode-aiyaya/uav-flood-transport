@@ -451,19 +451,20 @@ than fixing the type in advance. The overall procedure is summarized in Algorith
 
 \subsection{Problem 2: Heterogeneous Fleet Routing with Battery and Time Windows (HF-VRPBT)}
 Problem 2 relaxes the single-area structure and adds resource and time-window
-constraints: each trip may visit one or more service areas before returning. The
-decisions jointly determine box batching, visit sequence, machine type
-$\mu_k$, the executing airframe, the shared battery and the trip start time
-$t_0$, and a trip occupies the whole interval from preparation through
-take-off, flight, delivery, return and charging. With $B$ the 80 boxes,
+constraints: each trip may visit one or more service areas before returning.
+The decisions jointly determine box batching, visit sequence, machine type
+$\mu_k$, the executing airframe, the shared battery and the trip start time.
+With $B$ the 80 boxes,
 $B^{\mathrm{hard}}$ the 31 hard-deadline boxes and $B^{\mathrm{soft}}$ the rest,
 the constraints enforce one delivery per box, per-trip payload and volume
 limits, segment-wise residual payload, trip energy, return SOC $\ge\rho$, hard
 deadlines $t_b\le d_b$ for all $b\in B^{\mathrm{hard}}$, airframe and battery
 mutual exclusion, and recharge to $100\%$ before battery reuse. Formally, with
-$x_{kb}\in\{0,1\}$ marking the assignment of box $b$ to trip $k$ and
-$[s_k,e_k]$ the interval that trip $k$ occupies its airframe and battery, the
-scheduler accepts a plan only if
+$x_{kb}\in\{0,1\}$ marking the assignment of box $b$ to trip $k$, $[s_k,r_k]$
+the interval trip $k$ occupies its airframe ($s_k$: preparation start, $r_k$:
+return) and $[s_k,c_k]$ the interval its battery is occupied
+($c_k=r_k+T_{\mathrm{chg}}(\mathrm{SOC}_k)$: fully recharged), the scheduler
+accepts a plan only if
 \begin{equation}
 \begin{aligned}
 &\textstyle\sum_{k}x_{kb}=1\ \ (b\in B),\qquad
@@ -471,29 +472,35 @@ scheduler accepts a plan only if
 &\textstyle\sum_{b}x_{kb}V_{b}\le V^{\max}_{(\mu_k)},\qquad
 t_{b}\le d_{b}\ \ (b\in B^{\mathrm{hard}}),\\
 &\mathrm{SOC}_{k}=1-E_{k}/E^{\mathrm{bat}}_{(\mu_k)}\ge\rho,\\
-&[s_k,e_k]\cap[s_{k'},e_{k'}]=\varnothing
-\ \ \text{(shared airframe or battery),}
+&[s_k,r_k]\cap[s_{k'},r_{k'}]=\varnothing\ \ \text{(same airframe),}\\
+&[s_k,c_k]\cap[s_{k'},c_{k'}]=\varnothing\ \ \text{(same battery),}
 \end{aligned}
 \end{equation}
-i.e.\ the occupied intervals of trips sharing an airframe or a battery do not
-overlap, and a battery becomes reusable only after a full recharge. Four
+i.e.\ trips sharing an airframe or a battery never overlap, and a battery is
+reusable only after a full recharge, which takes
+$T_{\mathrm{chg}}(\mathrm{SOC})=T^{\mathrm{full}}_{(\mu)}\,[0.35+0.65\,(0.9-\mathrm{SOC})/0.9]$\,s
+under the two-stage charging rule ($T^{\mathrm{full}}=1800/2400/3000$\,s for
+A/B/C; all return SOCs in the computed plans lie below $0.9$). Along the visit
+sequence $\pi_k$ the residual payload is recursive,
+$\Lambda_{k,j}=\Lambda_{k,j-1}-\sum_{b:\mathrm{pos}(b)=j}m_b$,
+$\Lambda_{k,0}=\sum_b x_{kb}m_b$: each leg carries exactly the boxes still
+undelivered; multi-area sequences are restricted to type C, and the delivery
+instant $t_b$ follows the cumulative leg-time recursion
+(climb--cruise--descend per leg at the DEM-checked cruise altitude). Four
 objectives---timeliness, makespan $C_{\max}$ (latest return), transport energy
 and trip count---are compared in a non-dominated sense, with the soft delay
 $L_{\mathrm{soft}}=\sum_{b\in B^{\mathrm{soft}}}\max(0,t_b-d_b)$ measuring the
 lateness of the remaining boxes. Since the full trip-routing space is
 intractable, we enumerate a restricted candidate set (whole-area trips inherited
 from Problem 1, split first-batch tasks and short cross-area tours) and apply a
-deterministic urgency-first greedy schedule that inserts each trip for the task
-whose hard deadline is nearest while updating the affected airframe and battery
-occupancies. The three candidate classes play distinct roles: inherited whole-area trips
+deterministic urgency-first greedy schedule that inserts trips by nearest hard
+deadline. Inherited whole-area trips
 preserve the energy-optimality of the Problem-1 batches, split first-batch tasks
-decouple the urgent first deliveries from the residual load so that hard
-deadlines can be met before the full batch is ready, and short cross-area tours
-absorb small residual loads that would otherwise each cost a dedicated round
-trip. At every insertion the scheduler recomputes the occupancy intervals of the
-chosen airframe and battery, rejects placements violating the mutual-exclusion or
-recharge conditions above, and leaves soft-deadline lateness to be priced by
-$L_{\mathrm{soft}}$. The search evaluates 57
+decouple urgent first deliveries from the residual load so that hard deadlines
+are met before the full batch is ready, and short cross-area tours absorb small
+residual loads that would otherwise each cost a dedicated round trip; each
+insertion recomputes the occupancies of the chosen airframe and battery and
+rejects placements violating the conditions above. The search evaluates 57
 candidate plans and yields five non-dominated plans (Table~\ref{tab:pareto}):
 19 trips ($66.30$\,kWh), the recommended 20-trip plan ($65.25$\,kWh,
 $C_{\max}=2.72$\,h, soft delay $137.6$\,min), two further 20-trip plans that
@@ -521,7 +528,8 @@ satisfy $P_r\ge P_{\mathrm{thr}}=-90$\,dBm. The relay platform is a
 $23.5$\,kg multi-rotor with a $3.2$\,kWh swappable energy component: it cruises
 at $1.15$\,kW, and draws a flat $1.05+0.05$\,kW over each service window
 ($1.05$\,kW platform hover plus $0.05$\,kW communication payload), recharges in
-$1800$\,s under the two-stage charging rule, and must land with
+$T_{\mathrm{chg}}=500+1300\,(1-\mathrm{SOC})$\,s under the two-stage charging
+rule ($1800$\,s from a fully depleted component), and must land with
 $\mathrm{SOC}\ge0.20$; six components circulate between the two airframes and
 the chargers.
 
@@ -547,11 +555,12 @@ service interval with both hops above threshold), relay-before-task
 $s_c\le\min\{t_p\}$, bidirectional link budget
 $P_r\ge P_{\mathrm{thr}}$, hover-height limit
 $h_c\le h^{\mathrm{terr}}_c+300$\,m, resource exclusion, return SOC $\ge0.20$,
-component inventory (in-flight plus charging $\le6$), coverage rate
+component inventory (in-flight plus charging $\le6$, reusable only when fully
+charged), coverage rate
 $\ge\eta_{\mathrm{target}}$, and the transfer--link-establish timing between
 consecutive segments; the coverage rate counts verified relay-required
 trajectory points after removing duplicate boundary samples between consecutive
-segments so that no point is counted twice.
+segments.
 
 The solution procedure mirrors this structure: relay-required points are
 clustered into service intervals by greater-than-$400$\,s gaps; candidate hover
@@ -580,14 +589,11 @@ the same energy. Minimizing a common cost over a superset of feasible plans
 cannot raise the optimum.\hfill $\square$
 
 \noindent
-\emph{Empirical gap.} The proposition is a feasibility statement; how much the
-enlarged feasible set buys on the test instance is measured empirically. The
-tested single-hover heuristics attain only $51.0\%$, $62.7\%$ and $82.1\%$ of the
-relay-required points with one, two and three airframes, so the single-hover
-mode did not reach full coverage for $N\le3$ in these tests; under MHPRS the two
-available airframes chain several hover points per sortie and the verified plan
-covers all 11,713 sampled relay-required points with four sorties, showing where
-the practical gap comes from.
+\emph{Empirical gap.} The tested single-hover heuristics attain only
+$51.0\%$, $62.7\%$ and $82.1\%$ of the relay-required points with one, two and
+three airframes; under MHPRS the two available airframes chain several hover
+points per sortie and the verified plan covers all 11,713 sampled
+relay-required points with four sorties.
 
 \textbf{Proposition 2 (relay concurrency lower bound on the test instance).}
 Any feasible MHPRS plan for the test instance requires at least two relay
@@ -656,8 +662,11 @@ baseline, compared with the proposed MHPRS.}
 \subsection{Problem 4: Partition-Based Resource Accounting (SC-MAE-RG)}
 Problem 4 takes the Problem-3 joint plan as input and groups the 15 service
 areas into $K\in\{2,3\}$ task groups, subject to each area belonging to exactly
-one group, each group containing at least one area, and any areas that share a
-transport trip being placed in the same group. Each group independently accounts
+one group, each group containing at least three areas (an explicit operational
+grouping assumption: one- or two-area groups degenerate the grouping into
+per-area accounting; the one-area variant is reported in the benchmark for
+completeness), and any areas that share a transport trip being placed in the
+same group. Each group independently accounts
 for the eight resource classes (A/B/C airframes, A/B/C batteries, relay airframes
 and energy components) at their peak concurrency, because resources may not be
 reassigned across groups. For group $P_i$ and resource class $q$ the peak
@@ -665,10 +674,15 @@ concurrent demand is
 $N(P_i,q)=\max_\tau\sum_{u:S_u\cap P_i\ne\varnothing}\mathbf{1}\{\tau\in[a_u,b_u],\,\mathrm{type}(u)=q\}$,
 from which the configuration scale $D=\sum_i\sum_q N(P_i,q)$, the inventory gap
 $G=\sum_q\max(0,\sum_i N(P_i,q)-I_q)$, the cross-group relay count, the
-replication total and the inter-group balance index $J$ follow; candidate
-partitions are then ranked lexicographically by the key (unique cross-group
-relays, extra cross-group replicas, $D$, $G$, $J$), which penalizes relay
-replication before scale. The balance index is the mean
+replication total and the inter-group balance index $J$ follow; both $D$ and
+$G$ sum the eight resource classes with equal weight, so they act as
+inventory-count proxies rather than cost-weighted measures. Candidate
+partitions are enumerated from $80$ $K$-means seeds on standardized geographic
+coordinates (with the S008--S011 shared-sortie coupling enforced), two
+hand-built skeletons and the relay-service-induced split, and ranked
+lexicographically by (unique cross-group relays, extra cross-group replicas,
+$D$, $G$, $J$); the winner is the best partition within this pool, not a
+certified optimum over all partitions. The balance index is the mean
 coefficient of variation across six workload dimensions (boxes, mass, sorties,
 energy, busy duration and relay count),
 \begin{equation}
@@ -676,15 +690,13 @@ J(\mathcal{P})=\frac{1}{6}\sum_{\ell=1}^{6}\frac{\sigma_{\ell}(\mathcal{P})}
 {\mu_{\ell}(\mathcal{P})},
 \end{equation}
 so that $J{=}0$ marks a perfectly even split and larger values indicate
-workload concentration. The $K{=}2$ partition $[11,4]$
-gives $D{=}31$ and $G{=}5$ (two B-type airframes, two B-type batteries and one
-relay airframe), whereas $K{=}3$ $[7,4,4]$ gives $D{=}38$ and $G{=}10$; the
-balance index is $J{=}0.613$ for $K{=}2$ and $J{=}0.438$ for $K{=}3$, so $K{=}2$
-is preferred as it is smaller and less redundant. A zero-replication control
-lowers the scale to $D{=}30$ ($K{=}2$) and $D{=}31$ ($K{=}3$), showing that
-cross-group relay replication is the main source of redundancy. An
-entropy-weighted TOPSIS ranking identifies S001 as the most vulnerable service
-area, consistent with the heavy load carried by the larger group.
+workload concentration. On the test instance the recommended $K{=}2$ partition
+$[11,4]$ attains $D{=}31$ and $G{=}5$, against $D{=}38$ and $G{=}10$ for
+$K{=}3$ $[7,4,4]$, so $K{=}2$ is preferred (Sec.~\ref{sec:exp} details the
+per-class gaps and the zero-replication control). An
+entropy-weighted TOPSIS ranking (Sec.~\ref{sec:exp}) identifies S001 as the
+most delivery-pressured area, consistent with the heavy load carried by the
+larger group.
 
 % =====================================================================
 \section{Experimental Design and Results}\label{sec:exp}
@@ -952,45 +964,52 @@ balance index $J{=}0.613$; the $K{=}3$ plan splits $9/6/5$ sorties
 ($35.87/18.50/10.87$\,kWh) with $D{=}38$, $G{=}10$ and $J{=}0.438$. The
 zero-replication control lowers the scale to $D{=}30$ and $D{=}31$
 respectively, isolating cross-group relay replication as the cause of the
-extra redundancy. The entropy-weighted TOPSIS vulnerability ranking behind the
-S001 identification uses criteria weights of $0.412$ (mass), $0.385$ (volume),
-$0.106$ (distance) and $0.097$ (elevation); the five most vulnerable areas are
-listed in Table~\ref{tab:topsis}, where S001 ranks first by a factor of about
-$1.9$ in demand because it combines the largest demand with the shortest distance,
-making it the natural first wave. Table~\ref{tab:gap} details the
+extra redundancy. The entropy-weighted TOPSIS ranking behind the
+S001 identification measures \emph{delivery pressure}---how heavily an area
+loads the transport plan---rather than physical vulnerability: the weights are
+$0.412$ (mass), $0.385$ (volume), $0.106$ (distance), $0.097$ (elevation), so
+the index is demand-dominated. Table~\ref{tab:topsis} lists the five
+most-pressured areas: S001 ranks first, combining the largest demand
+($1.9\times$ the next-largest area) with the shortest distance, the natural
+first wave. Table~\ref{tab:gap} details the
 peak concurrent demand of the recommended $K{=}2$ partition: the smaller group
 still requires its own B-type fleet because trips may not be reassigned across
 groups, and exactly one relay sortie (R01M1) serves areas of both groups, which
 forces the third relay airframe and explains the replication term. The
 lexicographic key confirms this: $K{=}2$ needs one unique cross-group relay
-sortie and one extra replica, against three of each for $K{=}3$, and no
-evaluated candidate achieves fewer cross-group relays for either $K$, so the
-comparison is decided on scale and gap. The
+sortie and one extra replica, against three of each for $K{=}3$; no
+evaluated candidate satisfying the three-area rule achieves fewer cross-group
+relays for either $K$, so the comparison is decided on scale and gap. The
 single-hover baseline of Fig.~\ref{fig:mhprs}(b) is evaluated under exactly
-the same link budget and airframe inventory as MHPRS, so the coverage gap is
-attributable to the mode itself rather than to more generous resources.
+the same link budget, airframe inventory, per-sortie energy model, return-SOC
+floor and two-stage charging rule as MHPRS, so the coverage gap is
+attributable to the mode rather than to more generous resources.
 
 The resource-directed enumeration is benchmarked against generic unsupervised
 clustering: $K$-means ($100$ restarts) and Ward agglomerative clustering on
 standardized coordinates (geo) and on coordinates plus
 boxes--mass--volume--first-batch demand (geo+demand). Each clustering output
-receives the identical S008--S011 feasibility repair (shared sortie T18) and
-is scored by the identical peak-concurrency accounting; no method is re-solved
-under an extra minimum-group-size rule, so the comparison is like-for-like.
+receives the identical S008--S011 feasibility repair (shared sortie T18);
+all partitions are scored by the same peak-concurrency accounting and rows
+violating the three-area rule are marked
+$^{\dagger}$ and excluded from adoption.
 Table~\ref{tab:benchq4} reports all partitions. For $K{=}2$,
-SC-MAE-RG attains the smallest scale and gap ($31/5$) among the partitions that
-respect the shared-sortie constraint, against $36/9$ and $37/9$ for the geo
+SC-MAE-RG attains the smallest scale and gap ($31/5$) among the evaluated
+partitions satisfying the shared-sortie coupling and the three-area rule,
+against $36/9$ and $37/9$ for the geo
 clusterings, and $38/10$ for $K{=}3$ against $43/15$ and $40/12$. The geo
 clusterings obtain a smaller (better) balance index $J$ but at the price of more
 cross-group relay sorties and replicas, so the comparison is a trade-off among
 resource scale, inventory gap and cross-group relay redundancy rather than a
-strict dominance. The demand-feature variants attain an apparently lower $D/G$
-($29/4$ for $K{=}2$) because they isolate
+strict dominance. The demand-feature variants attain a lower $D/G$
+($29/4$ for $K{=}2$) by isolating
 S001 (154\,kg, $1.9\times$ the next-largest area) into a
-singleton group ($1{+}14$ for $K{=}2$; $1{+}7{+}7$ and $1{+}5{+}9$ for
-$K{=}3$); since S001 shares transport sortie T18 with S008, which the model
-places in the same group, these outputs violate the shared-sortie constraint and
-are reported for completeness rather than adopted. Generic clustering thus
+singleton group ($1{+}14$; $1{+}7{+}7$ and $1{+}5{+}9$ for
+$K{=}3$). These outputs satisfy the shared-sortie coupling---T18, the only
+multi-area sortie, links S011 and S008, which remain together, and S001's
+trips are single-area---so they are feasible under the one-area rule and
+indeed minimize $D/G$; they are inadmissible only under the three-area rule
+and are reported for completeness rather than adopted. Generic clustering thus
 minimizes feature dispersion without
 perceiving peak concurrency or the non-splittable shared-sortie coupling.
 
@@ -1020,9 +1039,10 @@ geo+demand clustering$^{\dagger}$ & 3 & 36--39 & 9--11 & 0.54--0.67 & 2--3 \\
 
 \vspace{2pt}
 {\footnotesize $^{\dagger}$The demand-feature clusterings isolate S001 into a
-singleton group ($1{+}14$; $1{+}7{+}7$ / $1{+}5{+}9$), which violates the
-shared-sortie constraint because S001 shares T18 with S008; the low gap is
-therefore not realizable.}
+singleton group ($1{+}14$; $1{+}7{+}7$ / $1{+}5{+}9$); this satisfies the
+shared-sortie coupling (T18 links S011 and S008, which stay together) but
+violates the three-area operational grouping rule, under which these rows are
+inadmissible.}
 \end{table}
 
 \begin{table}[t]
@@ -1054,8 +1074,8 @@ Relay energy components & 3 & 1 & 4 & 6 & 0 \\
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\caption{Top five service areas of the entropy-weighted TOPSIS vulnerability
-ranking (closeness coefficient; larger is more vulnerable).}
+\caption{Top five service areas of the entropy-weighted TOPSIS delivery-pressure
+ranking (closeness coefficient; larger means higher delivery pressure).}
 \label{tab:topsis}
 \begin{tabular}{lccccc}
 \toprule
