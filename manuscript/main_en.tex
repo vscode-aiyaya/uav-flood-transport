@@ -1124,8 +1124,8 @@ timeline also assumes an aggregate $37$\,s climb allowance for A/B departures
 (those samples remain directly connected), a raised corridor on S007 legs, and a
 $6$\,m clearance with bilinear interpolation in the direct-link test; the
 relay-coverage test uses the raw DEM profile, so its 100\% figure is tied to the
-reconstruction convention; at $6$\,m one reconstructed point leaves a service
-window uncovered, while relocating that hover point by $256$\,m restores full coverage with
+reconstruction convention; at $6$\,m one reconstructed hover point leaves a
+service window uncovered, while relocating that hover point by $256$\,m restores full coverage with
 $582$\,s of arrival slack, return state of charge $0.41$ and sortie energy
 $1.2\%$ above the frozen value. Second, relay
 demand is identified on a five-second search grid, which underestimates the
@@ -1163,8 +1163,8 @@ sorties at 5.43\,kWh (joint 70.68\,kWh). The partitioning stage then quantifies
 the resource gap and produces an explicit augmentation list. The sensitivity
 studies delineate the envelope: batching tolerates return margins up to $35\%$
 (failing at $40\%$), relay demand is governed by the receiving threshold rather
-than the terrain clearance, and only the multi-hover mode reaches full coverage
-on the 1-s grid with two airframes.
+than the terrain clearance, and among the tested implementations only the
+multi-hover mode reaches full coverage on the 1-s grid with two airframes.
 
 Further work should replace the one-second grid with event-driven
 continuous-time link checking, add wind, weather, stochastic demand and
