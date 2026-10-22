@@ -59,7 +59,7 @@ set-partitioning dynamic programming, giving an 18-trip plan at 59.24~kWh,
 (HF-VRPBT) adds heterogeneous fleet routing with time windows and recommends a
 20-trip plan at 65.25~kWh satisfying all 31 hard deadlines. Problem 3 introduces
 a \emph{multi-hover-point direct-transfer} relay mode: two relay UAVs cover all
-11,713 relay-required samples on the 1-s grid (11,645 unique sortie--time pairs)
+11,713 relay-required samples on the 1-s grid
 at a relay energy of 5.43~kWh, whereas the tested single-hover heuristics attain
 only 51.0\%, 62.7\% and 82.1\% with one, two and three airframes. On this
 instance two relay airframes are scheduled concurrently: two service windows
@@ -384,12 +384,12 @@ boxes and heterogeneous UAV fleets plus link parameters as unified inputs, we
 successively build DEM-ELBPP (Problem 1), HF-VRPBT (Problem 2), MHPRS (Problem
 3) and SC-MAE-RG (Problem 4). The four layers introduce return-safety margin and
 batching, deadline concurrency and battery turnover, full-process continuous
-communication, and partitioning resource allocation, respectively; the overall
-technical route is shown in Fig.~\ref{fig:route}.
+communication, and partitioning resource allocation, respectively; the resulting
+four-stage sequential framework is shown in Fig.~\ref{fig:route}.
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.74\linewidth]{fig_route.pdf}
-\caption{Overall technical route of the proposed framework.}
+\caption{Four-stage sequential optimization framework.}
 \label{fig:route}
 \end{figure}
 
@@ -407,9 +407,9 @@ would change the optimum subjectively:
 subject to
 \begin{align}
 &\bigcup_{k}\pi_k=B_j,\qquad \pi_k\cap\pi_{k'}=\varnothing\ (k\ne k'),\\
-&\sum_{n\in\pi_k}m_{n}\le m^{\mathrm{safe}}_{(i,j)},\qquad
-\sum_{n\in\pi_k}V_{n}\le V^{\max}_{(i)},\\
-&\mu_k\in\{A,B,C\},\quad \pi_k\subseteq B_j\ \text{(single area, no crossing).}
+&\sum_{b\in\pi_k}m_{b}\le m^{\mathrm{safe}}_{(i,j)},\qquad
+\sum_{b\in\pi_k}V_{b}\le V^{\max}_{(i)},\\
+&\mu_k\in\{A,B,C\},\quad \pi_k\subseteq B_j.
 \end{align}
 The key idea is to first back-solve the safe payload from the energy equation and
 then perform set partitioning under the payload--volume--energy triple constraint,
@@ -419,17 +419,19 @@ Candidate batches are enumerated per area (the largest area holds $n_j=15$
 boxes, so at most $2^{15}-1=32767$ subsets), and the exact solution uses
 set-partitioning dynamic programming:
 \begin{equation}
-dp[\text{mask}\cup\pi]=\min\Big(dp[\text{mask}\cup\pi],\ dp[\text{mask}]\oplus(\pi)\Big),
+\begin{aligned}
+\mathrm{dp}[\text{mask}\cup\pi]={}&\min\big(\mathrm{dp}[\text{mask}\cup\pi],\\
+&\mathrm{dp}[\text{mask}]\oplus(\pi)\big),
+\end{aligned}
 \end{equation}
 where $\oplus$ is vector addition and triples are compared lexicographically;
 the optimal batch sequence is then recovered by backtracking the predecessor
 chain. Two implementation facts bound the computational cost. First, the 45
 machine--area safe payloads are precomputed once by a 60-iteration binary
 search on the energy equation, so the DP never evaluates the continuous energy
-model. Second, because each area holds at most fifteen boxes, the per-area
-candidate count is at most $2^{15}-1=32767$ subsets before the
-payload--volume--energy filter and far fewer after it, and the DP state space
-is the $2^{15}$ masks of that area; mixed-type batching within an area is
+model. Second, because each area holds at most fifteen boxes, the filtered
+candidate count stays far below the $2^{15}$ masks of that area; mixed-type
+batching within an area is
 allowed, so the DP chooses the cheapest machine per candidate subset rather
 than fixing the type in advance. The overall procedure is summarized in Algorithm~\ref{alg:q1}.
 
@@ -440,7 +442,7 @@ than fixing the type in advance. The overall procedure is summarized in Algorith
 \STATE \textbf{input} box sets $B_j$, UAV parameters, DEM, margin $\rho$
 \STATE binary-search $m^{\mathrm{safe}}_{(i,j)}$ for each machine/area
 \STATE enumerate feasible subsets per area, filter by payload/volume/energy $\to$ candidate batches $C_j$
-\STATE init $dp[0]=(0,0,0)$, others $\infty$; relax candidate batches lexicographically
+\STATE init $\mathrm{dp}[0]=(0,0,0)$, others $\infty$; relax candidate batches lexicographically
 \STATE backtrack to output the optimal batching plan
 \STATE scan $\rho=20\%\sim40\%$ and repeat for sensitivity
 \STATE \textbf{output} optimal batching plan, per-area machine/energy, margin sensitivity
@@ -606,9 +608,9 @@ airframe may relocate between hover points.
 The combined stage-3 objective is
 \begin{align}
 \min Z &= E_{\mathrm{trans}}+E_{\mathrm{relay}}, \notag\\
-E_{\mathrm{relay}} &= \sum_{c}\!\Big(E^{\mathrm{fly}}_{c}
-+(P_{\mathrm{hover}}+P_{\mathrm{comm}})\tfrac{e_c-s_c}{3600}
-+P_{\mathrm{hover}}\tfrac{w_c}{3600}\Big),
+E_{\mathrm{relay}} &= \sum_{c}\Big(E^{\mathrm{fly}}_{c}
++(P_{\mathrm{hover}}+P_{\mathrm{comm}})\tfrac{e_c-s_c}{3600} \notag\\
+&\qquad +P_{\mathrm{hover}}\tfrac{w_c}{3600}\Big),
 \end{align}
 where $w_c$ is the accumulated hovering wait time within sortie $c$ and
 $E^{\mathrm{fly}}_{c}$ is the outbound/transfer/return flight energy. The
@@ -645,9 +647,9 @@ summarized in Algorithm~\ref{alg:q3}.
 \centering
 \includegraphics[width=0.74\linewidth]{fig_mhprs.pdf}
 \caption{Multi-hover-point direct-transfer relay scheduling mode.
-(a) Hover-point chains of the two multi-hover sorties (of the four) on the
-real node coordinates: Chain 1 is sortie R01M1, which serves three windows
-from its two points, and Chain 2 is sortie R02M2; gray dots are the 15
+(a) Hover-point chains of the two multi-hover sorties on the
+real node coordinates: Chain 1 is sortie R01M1 and Chain 2 is sortie R02M2;
+gray dots are the 15
 service areas, the star is the dispatch center O01/G01, and each transfer
 leg is the direct straight flight between successive hover points; (b) coverage of the
 11,713 sampled relay-required points versus the number of relay airframes under
@@ -667,7 +669,13 @@ for the eight resource classes (A/B/C airframes, A/B/C batteries, relay airframe
 and energy components) at their peak concurrency, because resources may not be
 reassigned across groups. For group $P_i$ and resource class $q$ the peak
 concurrent demand is
-$N(P_i,q)=\max_\tau\sum_{u:S_u\cap P_i\ne\varnothing}\mathbf{1}\{\tau\in[a_u,b_u],\,\mathrm{type}(u)=q\}$,
+\begin{equation}
+\begin{aligned}
+N(P_i,q)=\max_{\tau}\bigl|\{\,&u: S_u\cap P_i\ne\varnothing,\
+\tau\in[a_u,b_u],\\
+&\mathrm{type}(u)=q\,\}\bigr|,
+\end{aligned}
+\end{equation}
 from which the configuration scale $D=\sum_i\sum_q N(P_i,q)$, the inventory gap
 $G=\sum_q\max(0,\sum_i N(P_i,q)-I_q)$, the cross-group relay count, the
 replication total and the inter-group balance index $J$ follow; both $D$ and
@@ -922,9 +930,10 @@ frozen plan itself unaffected.
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \caption{Per-sortie verification of the four-sortie relay plan. Points are logged
-one-second samples (11,645 unique after removing 68 boundary duplicates); energy
+one-second samples, including 68 boundary duplicates (11,645 unique
+sortie--time pairs); energy
 is the rebuilt value against the frozen log (kWh); SOC is the rebuilt return
-state of charge; R01 flies M1--M2, R02 flies M1--M2. ($\times$2): the same
+state of charge; ($\times$2): the same
 physical hover point serves two service windows.}
 \label{tab:sortie}
 \begin{tabular}{llcccc}
@@ -1100,7 +1109,7 @@ decision: the recommended $K{=}2$ plan has a quantified gap of five resource
 units (two B-type airframes, two B-type batteries and one relay airframe). The
 outputs map onto field operations: executable per-trip load and route sheets,
 four relay sorties over seven service windows verified point-by-point at 1-s
-resolution, DEM cruise altitudes that keep the prescribed clearance, and a
+resolution, DEM-checked cruise altitudes, and a
 procurement list naming the five missing units; the zero-replication control
 shows cross-group relay sharing, not vehicle count, to be binding.
 
@@ -1109,8 +1118,8 @@ only against frozen computational artifacts: the reconstruction reproduces the
 relay-required count within 0.3\% and the relay energy within 0.1\%, but the
 hover points of two of the seven service windows are re-derived from the DEM
 grid rather than read from the
-frozen log, so this is a reconstruction check rather than an independent flight
-measurement, and no hardware flight test has been performed; wind, payload-drag
+frozen log, so this is a reconstruction, not an independent flight
+measurement, and no hardware test has been performed; wind, payload-drag
 and battery-aging effects could shift the absolute figures. The reconstructed
 timeline also assumes an aggregate $37$\,s climb allowance for A/B departures
 (those samples remain directly connected), a raised corridor on S007 legs, and a
@@ -1144,9 +1153,9 @@ per-second verification are embarrassingly parallel.
 \section{Conclusion}
 % ---------------------------------------------------------------------
 This paper built a four-stage ``transport scheduling--communication
-support--resource allocation'' framework that runs on one consistent physical
-model; its core stage constructs, once the delivery plan is fixed, a relay
-schedule that satisfies coverage, energy and resource constraints. The exact
+support--resource allocation'' framework on one consistent physical model, in
+which the core stage constructs a relay schedule once the delivery plan is
+fixed. The exact
 batching model returns an 18-trip plan at 59.24\,kWh with a verified optimality
 benchmark; the heterogeneous routing model delivers all 80 boxes, satisfies all
 31 hard deadlines and recommends a 20-trip plan at 65.25\,kWh; and the relay
@@ -1166,17 +1175,16 @@ report acceptance rates on end-to-end geographic families.
 % =====================================================================
 \section*{Acknowledgment}
 This work originated from an entry to the China Postgraduate Mathematical
-Contest in Modeling; the authors thank the contest organizers for providing the
+Contest in Modeling; the authors thank the organizers for the
 mountainous test scenario and data.
 
-\noindent\textbf{Funding:} This research received no specific grant from any
+\noindent\textbf{Funding:} No specific grant was received from any
 funding agency in the public, commercial, or not-for-profit sectors.
 
 \noindent\textbf{Conflict of interest:} The authors declare no competing
 interests.
 
-\noindent\textbf{Data availability:} Code, test instance, benchmark suite and
-verification pipeline:
+\noindent\textbf{Data availability:} Code, data and verification pipeline:
 \texttt{https://github.com/\allowbreak vscode-aiyaya/\allowbreak uav-flood-transport}
 (archival DOI upon acceptance).
 
