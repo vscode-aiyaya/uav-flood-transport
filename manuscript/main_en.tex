@@ -921,8 +921,7 @@ point-cloud centroid. Because two hover points are reconstructed from the DEM
 grid rather than read from the frozen log, this recomputation is a reconstruction
 check of the frozen plan rather than a fully independent measurement; it uses the
 design parameters unchanged, including the transfer-climb efficiency
-$\eta_c=0.72$ (no parameter is fitted to the frozen results), and leaves the
-frozen plan itself unaffected.
+$\eta_c=0.72$, and leaves the frozen plan itself unaffected.
 
 \begin{table}[t]
 \centering
@@ -1163,8 +1162,8 @@ sorties at 5.43\,kWh (joint 70.68\,kWh). The partitioning stage then quantifies
 the resource gap and produces an explicit augmentation list. The sensitivity
 studies delineate the envelope: batching tolerates return margins up to $35\%$
 (failing at $40\%$), relay demand is governed by the receiving threshold rather
-than the terrain clearance, and among the tested implementations only the
-multi-hover mode reaches full coverage on the 1-s grid with two airframes.
+than the terrain clearance, and among the tested implementations, only MHPRS
+achieves full sampled coverage on the 1-s grid with two relay airframes.
 
 Further work should replace the one-second grid with event-driven
 continuous-time link checking, add wind, weather, stochastic demand and
