@@ -223,7 +223,7 @@ the concurrent service windows that motivate the two-airframe plan. Two relay
 UAVs cover all
 11,713 sampled relay-required points on the 1-s grid, against 51.0\%, 62.7\% and
 82.1\% for the tested single-hover heuristics with one, two and three airframes.
-\item \textbf{A consistent, independently verified implementation.} Each
+\item \textbf{A consistent, cross-checked implementation.} Each
 headline number is recomputed from the frozen outputs by a separate script
 (coverage within $0.3\%$, relay energy within $0.1\%$); this is a reproducibility
 contribution, not a new physical law, and the sequential chain claims no joint
@@ -558,9 +558,8 @@ $h_c\le h^{\mathrm{terr}}_c+300$\,m, resource exclusion, return SOC $\ge0.20$,
 component inventory (in-flight plus charging $\le6$, reusable only when fully
 charged), coverage rate
 $\ge\eta_{\mathrm{target}}$, and the transfer--link-establish timing between
-consecutive segments; the coverage rate counts verified relay-required
-trajectory points after removing duplicate boundary samples between consecutive
-segments.
+consecutive segments; the reported coverage counts logged relay-required
+sample rows, including boundary duplicates between consecutive segments.
 
 The solution procedure mirrors this structure: relay-required points are
 clustered into service intervals by greater-than-$400$\,s gaps; candidate hover
@@ -593,9 +592,9 @@ cannot raise the optimum.\hfill $\square$
 $51.0\%$, $62.7\%$ and $82.1\%$ with one, two and three airframes, whereas
 MHPRS covers all 11,713 sampled relay-required points with four sorties.
 
-\textbf{Observation 1 (relay concurrency on the test instance).} In the
-evaluated candidate pool, a single relay airframe is not sufficient for the test
-instance. Two first-segment service windows overlap, $[751.8,1512.6]$\,s and
+\textbf{Observation 1 (relay concurrency on the test instance).} No feasible
+single-airframe schedule was found in the evaluated search. Two first-segment
+service windows overlap, $[751.8,1512.6]$\,s and
 $[752.8,1712.7]$\,s, sharing $759.8$\,s of time, while their point-cloud
 centroids lie $7188.5$\,m apart. The union of their relay-required points
 contains $3765$ samples; of the $397$ enumerated candidate hover points the best
@@ -891,11 +890,11 @@ $\rho$ & Trips & Energy (kWh) & Duration (h) & Remark \\
 
 For the relay stage, Table~\ref{tab:threshold} tightens the receiving
 threshold: from $-98$ to $-95$ to $-90$\,dBm the relay-required points grow
-from 0 to 806 to 2311 (the last figure is the stricter $-90$\,dBm case, not the
-baseline population of 11,713) and the directly served areas shrink from 15 to 10 to 3.
-Under the single-hover-point round-trip baseline only 51.0\%, 62.7\% and
-82.1\% of these points are covered by one, two and three airframes, so the
-tested single-hover heuristics fall short of full coverage. Raising the safety
+from 0 to 806 to 2311 and the directly served areas shrink from 15 to 10 to 3.
+The 5-s scan at $-90$\,dBm contains these 2311 relay-required samples, whereas
+the 1-s verification set contains 11,713 logged rows; on the latter set the
+tested single-hover heuristics cover 51.0\%, 62.7\% and 82.1\% with one, two
+and three airframes, so they fall short of full coverage. Raising the safety
 clearance above the terrain-following cruise altitude from 0 to 25 to 50\,m
 increases the direct-connection rate only moderately, from 61.7\% to 63.2\% to
 64.7\%, so the relay requirement is governed mainly by the receiving threshold
@@ -1126,7 +1125,7 @@ timeline also assumes an aggregate $37$\,s climb allowance for A/B departures
 $6$\,m clearance with bilinear interpolation in the direct-link test; the
 relay-coverage test uses the raw DEM profile, so its 100\% figure is tied to the
 reconstruction convention; at $6$\,m one reconstructed point leaves a service
-window uncovered, while relocating it by $256$\,m restores full coverage with
+window uncovered, while relocating that hover point by $256$\,m restores full coverage with
 $582$\,s of arrival slack, return state of charge $0.41$ and sortie energy
 $1.2\%$ above the frozen value. Second, relay
 demand is identified on a five-second search grid, which underestimates the

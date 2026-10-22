@@ -1,0 +1,20 @@
+[
+  {
+    "figure": "fig_system",
+    "width_in": 2.6,
+    "height_in": 2.2256,
+    "outside_text": []
+  },
+  {
+    "figure": "fig_route",
+    "width_in": 2.6,
+    "height_in": 2.686666666666667,
+    "outside_text": []
+  },
+  {
+    "figure": "fig_mhprs",
+    "width_in": 2.6,
+    "height_in": 3.21,
+    "outside_text": []
+  }
+]

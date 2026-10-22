@@ -16,6 +16,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, Polygon
 from matplotlib.lines import Line2D
+from matplotlib.text import Text
+import json
 import numpy as np
 import pandas as pd
 import os
@@ -66,6 +68,31 @@ def new_fig(xlim, ylim, fig_w=FIG_W):
     return fig, ax
 
 
+# Audit guard: every text must stay inside the fixed canvas
+# (bbox_inches="tight" would change the page box, so overflow is caught here).
+FIGURE_AUDIT = []
+
+def export_figure(fig, stem):
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    outer = fig.bbox
+    outside = []
+    for artist in fig.findobj(match=Text):
+        if not artist.get_visible() or not artist.get_text().strip():
+            continue
+        box = artist.get_window_extent(renderer)
+        if (box.x0 < outer.x0 - 0.5 or box.y0 < outer.y0 - 0.5
+                or box.x1 > outer.x1 + 0.5 or box.y1 > outer.y1 + 0.5):
+            outside.append(artist.get_text())
+    if outside:
+        raise ValueError(f"Text outside fixed canvas in {stem}: {outside}")
+    width, height = fig.get_size_inches()
+    FIGURE_AUDIT.append(dict(figure=stem, width_in=float(width),
+                             height_in=float(height), outside_text=outside))
+    fig.savefig(os.path.join(OUT, stem + ".pdf"))
+    fig.savefig(os.path.join(OUT, stem + ".png"), dpi=400)
+
+
 # ============================================================ FIG 1
 fig, ax = new_fig((0, 12.5), (0, 10.7))
 
@@ -111,9 +138,10 @@ ax.plot([CX_M, CX_M], [Y_BB + BOX_H, Y_TB], color=DGRAY, lw=1.0,
         solid_capstyle="round", zorder=5)
 arrow_head(ax, CX_M, Y_BB + BOX_H, "down", color=DGRAY)
 arrow_head(ax, CX_M, Y_TB, "up", color=DGRAY)
-ax.annotate("round trip", xy=(CX_M, CY), xytext=(-8, 0),
+ax.annotate("round\ntrip", xy=(CX_M, CY), xytext=(7, 0),
             xycoords="data", textcoords="offset points",
-            fontsize=5.8, color=DGRAY, ha="right", va="center")
+            fontsize=6.0, color=DGRAY, ha="left", va="center",
+            linespacing=1.1)
 
 # ---- right column: one relay sortie in the shadowed back-slope zone ----
 rect(ax, 8.4, 0.6, 3.8, 8.6, fc=WHITE, ec=MGRAY, lw=0.9, ls="--")
@@ -157,8 +185,7 @@ ax.text(6.25, 10.4, "two-hop link: transport → relay → G01",
 ax.text(6.25, 9.8, "(both directions ≥ −90 dBm)",
         ha="center", va="center", fontsize=5.6, color=MGRAY)
 
-fig.savefig(os.path.join(OUT, "fig_system.pdf"))
-fig.savefig(os.path.join(OUT, "fig_system.png"), dpi=300)
+export_figure(fig, "fig_system")
 plt.close(fig)
 
 
@@ -207,7 +234,7 @@ for i in range(len(Heads) - 1):
     arrow_head(ax, CX, y_bot, "down", color=BLACK)
     ax.annotate(Outputs[i], xy=(CX, (y_top + y_bot) / 2), xytext=(6, 0),
                 xycoords="data", textcoords="offset points",
-                fontsize=5.2, color=DGRAY, ha="left", va="center")
+                fontsize=5.6, color=DGRAY, ha="left", va="center")
 
 # side bracket: the shared model applies to all four stages
 ax.plot([0.16, 0.16], [YS[-1], YS[0] + BOX_H], color=MGRAY, lw=0.8, ls="--",
@@ -216,8 +243,7 @@ ax.plot([0.16, 0.32], [YS[-1], YS[-1]], color=MGRAY, lw=0.8, ls="--", zorder=4)
 ax.plot([0.16, 0.32], [YS[0] + BOX_H, YS[0] + BOX_H], color=MGRAY, lw=0.8,
         ls="--", zorder=4)
 
-fig.savefig(os.path.join(OUT, "fig_route.pdf"))
-fig.savefig(os.path.join(OUT, "fig_route.png"), dpi=300)
+export_figure(fig, "fig_route")
 plt.close(fig)
 
 
@@ -238,11 +264,11 @@ o01 = nodes[nodes["编号"] == "O01"].iloc[0]
 O_lon, O_lat = float(o01["经度"]), float(o01["纬度"])
 svc = nodes[nodes["编号"].astype(str).str.startswith("S")]
 axm.scatter(svc["经度"].astype(float), svc["纬度"].astype(float),
-            s=7, c=LGRAY, marker="o", zorder=2, alpha=0.85)
-axm.scatter([O_lon], [O_lat], s=95, c=MGRAY, marker="*", zorder=4)
+            s=5, c=LGRAY, marker="o", zorder=2, alpha=0.65)
+axm.scatter([O_lon], [O_lat], s=65, c=MGRAY, marker="*", zorder=4)
 axm.annotate("O01 / G01", xy=(O_lon, O_lat), xytext=(0, -9),
              xycoords="data", textcoords="offset points",
-             fontsize=5.4, color=MGRAY, ha="center", va="top")
+             fontsize=5.8, color=MGRAY, ha="center", va="top")
 
 # hover-point chains of the two multi-hover sorties, read from the unified
 # frozen plan (script-02 verification summary; consecutive duplicates removed,
@@ -264,23 +290,31 @@ c2 = chain_points("R02M2")   # [PER3-SW, PER4]
 (p1x, p1y), (p2x, p2y) = c1[0], c1[1]
 axm.plot([p1x, p2x], [p1y, p2y], color=BLACK, lw=0.9, ls="--",
          solid_capstyle="round", zorder=5)
-axm.scatter([p1x], [p1y], s=62, c=WHITE, edgecolors=BLACK, marker="s", zorder=7, linewidths=1.1)
-axm.scatter([p2x], [p2y], s=62, c=WHITE, edgecolors=BLACK, marker="s", zorder=7, linewidths=1.1)
-axm.annotate("PER1_E", xy=(p1x, p1y), xytext=(5, 0), xycoords="data",
-             textcoords="offset points", fontsize=5.0, ha="left", va="center")
-axm.annotate("PER3-NE", xy=(p2x, p2y), xytext=(6, 9), xycoords="data",
-             textcoords="offset points", fontsize=5.3, ha="left", va="bottom")
+axm.scatter([p1x], [p1y], s=45, c=WHITE, edgecolors=BLACK, marker="s", zorder=7, linewidths=1.1)
+axm.scatter([p2x], [p2y], s=45, c=WHITE, edgecolors=BLACK, marker="s", zorder=7, linewidths=1.1)
+axm.annotate("PER1_E", xy=(p1x, p1y), xytext=(-18, -8), xycoords="data",
+             textcoords="offset points", fontsize=6.0, ha="center", va="top",
+             arrowprops=dict(arrowstyle="-", color=MGRAY, lw=0.45,
+                             shrinkA=1.5, shrinkB=4.5))
+axm.annotate("PER3-NE", xy=(p2x, p2y), xytext=(7, 12), xycoords="data",
+             textcoords="offset points", fontsize=6.0, ha="left", va="bottom",
+             arrowprops=dict(arrowstyle="-", color=MGRAY, lw=0.45,
+                             shrinkA=1.5, shrinkB=4.5))
 
 # Chain 2: straight direct-flight transfer leg, PER3-SW -> PER4
 (q1x, q1y), (q2x, q2y) = c2[0], c2[1]
 axm.plot([q1x, q2x], [q1y, q2y], color=DGRAY, lw=0.9, ls=(0, (1.2, 1.0)),
          solid_capstyle="round", zorder=5)
-axm.scatter([q1x], [q1y], s=62, c=WHITE, edgecolors=DGRAY, marker="^", zorder=7, linewidths=1.1)
-axm.scatter([q2x], [q2y], s=62, c=WHITE, edgecolors=DGRAY, marker="^", zorder=7, linewidths=1.1)
-axm.annotate("PER3-SW", xy=(q1x, q1y), xytext=(-15, -2), xycoords="data",
-             textcoords="offset points", fontsize=5.3, color=DGRAY, ha="right", va="center")
-axm.annotate("PER4", xy=(q2x, q2y), xytext=(-6, 4), xycoords="data",
-             textcoords="offset points", fontsize=5.3, color=DGRAY, ha="right", va="bottom")
+axm.scatter([q1x], [q1y], s=45, c=WHITE, edgecolors=DGRAY, marker="^", zorder=7, linewidths=1.1)
+axm.scatter([q2x], [q2y], s=45, c=WHITE, edgecolors=DGRAY, marker="^", zorder=7, linewidths=1.1)
+axm.annotate("PER3-SW", xy=(q1x, q1y), xytext=(-7, -1), xycoords="data",
+             textcoords="offset points", fontsize=6.0, color=DGRAY, ha="right", va="center",
+             arrowprops=dict(arrowstyle="-", color=MGRAY, lw=0.45,
+                             shrinkA=1.5, shrinkB=4.5))
+axm.annotate("PER4", xy=(q2x, q2y), xytext=(-4, 13), xycoords="data",
+             textcoords="offset points", fontsize=6.0, color=DGRAY, ha="right", va="bottom",
+             arrowprops=dict(arrowstyle="-", color=MGRAY, lw=0.45,
+                             shrinkA=1.5, shrinkB=4.5))
 
 # chain identifiers go into an axes legend placed in the empty upper-left
 # corner, so no text sits on a link line, a marker or the frame
@@ -291,7 +325,7 @@ axm.legend(handles=[
     Line2D([0], [0], color=DGRAY, lw=0.9, ls=(0, (1.2, 1.0)), marker="^",
            markersize=3.6, markerfacecolor=WHITE, markeredgecolor=DGRAY,
            markeredgewidth=0.7, label="Chain 2")],
-    loc="upper left", bbox_to_anchor=(0.0, 1.0), fontsize=5.0,
+    loc="upper left", bbox_to_anchor=(0.0, 1.0), fontsize=5.7,
     frameon=False, handlelength=2.0, handletextpad=0.4,
     labelspacing=0.3, borderpad=0.0, borderaxespad=0.4)
 
@@ -299,7 +333,7 @@ axm.set_xlabel("longitude (deg)", fontsize=6.0, labelpad=2)
 axm.set_ylabel("latitude (deg)", fontsize=6.0, labelpad=2)
 # panel labels only; descriptions live in the LaTeX caption (IEEE style)
 axm.set_title("(a)", fontsize=6.2, pad=3)
-axm.tick_params(labelsize=5.0, pad=1.5)
+axm.tick_params(labelsize=5.8, pad=1.5)
 
 # ---------- (b) ----------
 # bars read from computed outputs: script-04 single-hover baseline on the
@@ -307,38 +341,49 @@ axm.tick_params(labelsize=5.0, pad=1.5)
 xpos = np.arange(4)
 _base = pd.read_csv(os.path.join(Q3B, "Q3_重建_单悬停基线_保障率.csv"),
                     encoding="utf-8-sig")
+# Main bar recomputed from the frozen verification rows, never assumed 100%.
+_main = pd.read_csv(os.path.join(Q3B, "Q3_规范集合_覆盖核验逐点.csv"),
+                    encoding="utf-8-sig")
+_main_total = len(_main)
+_main_pass = int(_main["核验通过"].sum())
+if _main_total == 0 or not _main["核验通过"].isin([0, 1]).all():
+    raise ValueError("Invalid main-plan coverage flags")
+if not (_base["总需中继点"] == _main_total).all():
+    raise ValueError("Baseline and main-plan denominators differ")
 vals = [round(100.0 * float(_base.loc[_base["中继机架数"] == n, "保障需中继点"].iloc[0])
               / float(_base.loc[_base["中继机架数"] == n, "总需中继点"].iloc[0]), 1)
-        for n in (1, 2, 3)] + [100.0]
+        for n in (1, 2, 3)] + [round(100.0 * _main_pass / _main_total, 1)]
+print("Coverage (logged rows):", _main_pass, "/", _main_total, vals)
 axb.bar(xpos[:3], vals[:3], width=0.58, fc=VLGRAY, ec=BLACK, lw=0.7,
-        hatch="//", label="Single-hover", zorder=3)
+        hatch="/", label="Single-hover", zorder=3)
 axb.bar([xpos[3]], [vals[3]], width=0.58, fc=DGRAY, ec=BLACK, lw=0.7,
-        hatch="xx", label="MHPRS (this work)", zorder=3)
+        hatch="x", label="MHPRS (this work)", zorder=3)
 for xi, v in zip(xpos[:3], vals[:3]):
     axb.annotate("%.1f" % v, xy=(xi, v), xytext=(0, 2.5),
                  xycoords="data", textcoords="offset points",
-                 fontsize=5.2, ha="center", va="bottom", color=DGRAY)
+                 fontsize=6.0, ha="center", va="bottom", color=DGRAY)
 # MHPRS value above its bar (never inside: keeps the label off the hatch)
-axb.annotate("100.0", xy=(xpos[3], vals[3]), xytext=(0, 2.5),
+axb.annotate("%.1f" % vals[3], xy=(xpos[3], vals[3]), xytext=(0, 2.5),
              xycoords="data", textcoords="offset points",
-             fontsize=5.2, ha="center", va="bottom", color=BLACK, weight="bold")
+             fontsize=6.0, ha="center", va="bottom", color=BLACK, weight="bold")
 axb.set_xticks(xpos)
 axb.set_xticklabels(["1 airframe", "2 airframes", "3 airframes",
-                     "MHPRS\n(2 airframes)"], fontsize=5.0, linespacing=1.15)
+                     "MHPRS\n(2 airframes)"], fontsize=5.8, linespacing=1.15)
 axb.set_ylim(0, 130)
 axb.set_yticks([0, 20, 40, 60, 80, 100])
 axb.set_ylabel("relay-required points\ncovered (%)", fontsize=6.0, labelpad=2)
 axb.set_title("(b)", fontsize=6.2, pad=3)
-axb.tick_params(labelsize=5.0, pad=1.5)
+axb.tick_params(labelsize=5.8, pad=1.5)
 # legend: placed well below the two-line x-tick labels, never over any data
 axb.legend(loc="lower center", bbox_to_anchor=(0.5, -0.46), ncol=2,
-           fontsize=4.8, framealpha=0.95, borderpad=0.35,
+           fontsize=5.6, framealpha=0.95, borderpad=0.35,
            handlelength=1.7, labelspacing=0.25, columnspacing=1.0)
 for s in ("top", "right"):
     axb.spines[s].set_visible(False)
 
-fig.savefig(os.path.join(OUT, "fig_mhprs.pdf"))
-fig.savefig(os.path.join(OUT, "fig_mhprs.png"), dpi=300)
+export_figure(fig, "fig_mhprs")
 plt.close(fig)
 
-print("All figures generated successfully.")
+with open(os.path.join(OUT, "figure_audit.json"), "w", encoding="utf-8") as f:
+    json.dump(FIGURE_AUDIT, f, indent=2)
+print("All figures generated successfully; all labels are within their PDF page boxes.")
