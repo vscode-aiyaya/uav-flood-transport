@@ -1123,10 +1123,11 @@ timeline also assumes an aggregate $37$\,s climb allowance for A/B departures
 (those samples remain directly connected), a raised corridor on S007 legs, and a
 $6$\,m clearance with bilinear interpolation in the direct-link test; the
 relay-coverage test uses the raw DEM profile, so its 100\% figure is tied to the
-reconstruction convention; at $6$\,m one reconstructed hover point leaves a
-service window uncovered, while relocating that hover point by $256$\,m restores full coverage with
-$582$\,s of arrival slack, return state of charge $0.41$ and sortie energy
-$1.2\%$ above the frozen value. Second, relay
+reconstruction convention; at $6$\,m, one reconstructed hover point leaves a
+service window uncovered. A local $256$\,m adjustment restores sampled coverage
+of that window (arrival slack $582$\,s, return SOC $0.41$, and sortie energy
+$1.2\%$ above the frozen value). The full scheduling pipeline was not rerun
+under this rule. Second, relay
 demand is identified on a five-second search grid, which underestimates the
 relay-required population relative to the one-second verification grid; the
 11,713-sample coverage claim therefore holds only on the one-second grid under
