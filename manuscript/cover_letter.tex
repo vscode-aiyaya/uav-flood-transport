@@ -1,0 +1,78 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{mathptmx}
+\usepackage[hidelinks]{hyperref}
+\pagestyle{empty}
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+\begin{flushright}
+October 22, 2026
+\end{flushright}
+
+Editor-in-Chief\\
+IEEE Transactions on Intelligent Transportation Systems
+
+\vspace{6pt}
+Dear Editor-in-Chief,
+
+I submit the manuscript ``Multi-Hover-Point Relay Scheduling for UAV
+Emergency Delivery under a Fixed Transport Plan'' for consideration as a
+regular paper in IEEE Transactions on Intelligent Transportation Systems.
+
+Mountain floods damage roads and communication facilities at the same time, so
+emergency delivery and communication support have to be organized together
+under blocked roads, tight energy budgets and incomplete information. The
+manuscript builds a ``transport scheduling--communication support--resource
+allocation'' chain on one consistent physical model: energy-aware batching
+(18 trips, 59.24\,kWh, 0.69\% below FFD/BFD on the test instance),
+heterogeneous-fleet routing with battery and time windows (20 trips,
+65.25\,kWh, 80 boxes and all 31 hard deadlines met), task-driven relay
+scheduling, and partition-based resource accounting. Every headline number is
+recomputed from the frozen artifacts by an independent read-only verifier
+(relay-required count within 0.3\%, relay energy within 0.1\%).
+
+The central contribution is the multi-hover-point relay scheduling mode
+(MHPRS): one relay UAV serves several hover points per take-off/return cycle
+instead of returning to base after each service window. On the test instance,
+two relay airframes cover all 11,713 relay-required samples on the 1-s grid
+with four sorties at 5.43\,kWh (joint energy 70.68\,kWh), whereas the tested
+single-hover heuristics reach only 51.0\%, 62.7\% and 82.1\% with one, two and
+three airframes; the single-hover feasible set is a subset of the proposed one.
+The mode is formulated under a fixed transport plan and coupled to DEM-based
+cruise altitudes, energy and airframe/battery turnover constraints, which is
+where it differs from relay-placement or trajectory studies that optimize a
+single sortie. The manuscript explicitly does not claim a joint optimum: the four stages run
+in a dependency order, and the paper states this positioning and the scope of
+its numerical claims.
+
+I also wish to be transparent about the instance. It is a reconstructed
+relief scenario: two of the seven service windows re-derive hover points from
+the DEM grid rather than read them from the original log, so the agreement is
+reported as a reconstruction check, not as a flight test. The conventions used
+in the reconstruction---an aggregate 37\,s climb allowance for A/B departures,
+a raised corridor on S007 legs, and a 6\,m clearance with bilinear
+interpolation---are declared in the limitations section. The 100\% coverage
+figure is tied to the stated verification convention; under a stricter 6\,m
+check one reconstructed hover point misses its link threshold by 0.96\,dB, and
+a local 256\,m adjustment restores sampled coverage of the affected window with
+582\,s of arrival slack.
+
+The manuscript is original, has not been published in a peer-reviewed venue
+and is not under consideration elsewhere. I declare no competing interests;
+the work received no specific funding. Code, instance data, the benchmark suite and the read-only
+verification pipeline are available at
+\url{https://github.com/vscode-aiyaya/uav-flood-transport}.
+
+\vspace{10pt}
+Sincerely,
+
+\vspace{16pt}
+Xin Yang\\
+School of Mechanical and Power Engineering, Zhengzhou University\\
+Zhengzhou, Henan 450001, China\\
+\href{mailto:xinyang.zzu@outlook.com}{xinyang.zzu@outlook.com}
+
+\end{document}
