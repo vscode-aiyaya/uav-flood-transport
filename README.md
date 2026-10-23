@@ -4,7 +4,7 @@ Reproducibility repository accompanying the manuscript:
 
 > **Multi-Hover-Point Relay Scheduling for UAV Emergency Delivery under a
 > Fixed Transport Plan**
-> Yang Xin, Zhao Zidong, Song Yuwei.
+> Xin Yang.
 > *Manuscript, 2026* (preprint/journal reference to be added).
 
 The repository contains the full four-stage model chain — exact energy-aware
